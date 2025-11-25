@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Image as ImageIcon, Type, Square, Download, Settings } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize }) => {
+const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
 
@@ -107,10 +107,37 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
 
                 {activeTab === 'elements' && (
                     <div className={styles.panel}>
-                        <h3>Elements</h3>
+                        <h3>Zones</h3>
                         <button className={styles.toolButton} onClick={onAddZone}>
                             <Square size={16} /> Add Card Zone
                         </button>
+
+                        {zones.length > 0 && (
+                            <div className={styles.zoneList}>
+                                <h4>Zone List ({zones.length})</h4>
+                                {zones.map((zone) => (
+                                    <div
+                                        key={zone.id}
+                                        className={`${styles.zoneItem} ${selectedId === zone.id ? styles.zoneItemActive : ''}`}
+                                        onClick={() => onSelectZone(zone.id)}
+                                    >
+                                        <div className={styles.zoneItemHeader}>
+                                            <Square size={14} />
+                                            <span className={styles.zoneItemTitle}>
+                                                {zone.text || 'Untitled Zone'}
+                                            </span>
+                                        </div>
+                                        <div className={styles.zoneItemInfo}>
+                                            {(zone.width / 96).toFixed(2)}" × {(zone.height / 96).toFixed(2)}"
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {zones.length === 0 && (
+                            <p className={styles.hint}>No zones created yet. Click "Add Card Zone" to get started.</p>
+                        )}
                     </div>
                 )}
 

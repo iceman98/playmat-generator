@@ -122,6 +122,9 @@ function App() {
         onSetGridEnabled={setGridEnabled}
         gridSize={gridSize}
         onSetGridSize={setGridSize}
+        zones={zones}
+        selectedId={selectedId}
+        onSelectZone={selectShape}
       />
       <DesignStage
         ref={stageRef}
