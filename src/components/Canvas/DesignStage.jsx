@@ -4,23 +4,37 @@ import styles from './DesignStage.module.css';
 import BackgroundLayer from './Layers/BackgroundLayer';
 import CardZone from './Layers/CardZone';
 import GridLayer from './Layers/GridLayer';
+import {
+    DEFAULT_MAT_SIZE,
+    DEFAULT_EXPORT_DPI,
+    DEFAULT_GRID_ENABLED,
+    DEFAULT_GRID_SIZE,
+    DEFAULT_UNIT,
+    SCREEN_DPI,
+    DEFAULT_SHOW_BORDER,
+    DEFAULT_SHOW_GRID,
+    CANVAS_PADDING,
+    ZOOM_SCALE_BY,
+    UI_COLORS,
+    EXPORT_FILENAME,
+    EXPORT_DELAY_MS
+} from '../../constants';
 
-const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = { width: 24, height: 14 }, dpi = 300, gridEnabled = false, gridSize = 0.5, unit = 'inch' }, ref) => {
+const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT }, ref) => {
     const stageRef = useRef(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [showBorder, setShowBorder] = useState(true);
-    const [showGrid, setShowGrid] = useState(true);
+    const [showBorder, setShowBorder] = useState(DEFAULT_SHOW_BORDER);
+    const [showGrid, setShowGrid] = useState(DEFAULT_SHOW_GRID);
     const [isPanning, setIsPanning] = useState(false);
 
     // Mat dimensions in inches (Standard MTG Playmat)
     const matWidthInches = matSize.width;
     const matHeightInches = matSize.height;
-    const screenDpi = 96; // Screen DPI for display
 
-    const matWidth = matWidthInches * screenDpi;
-    const matHeight = matHeightInches * screenDpi;
+    const matWidth = matWidthInches * SCREEN_DPI;
+    const matHeight = matHeightInches * SCREEN_DPI;
 
     useImperativeHandle(ref, () => ({
         exportImage: () => {
@@ -61,7 +75,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                     stage.position(originalPosition);
 
                     const link = document.createElement('a');
-                    link.download = 'playmat-design.png';
+                    link.download = EXPORT_FILENAME;
                     link.href = uri;
                     document.body.appendChild(link);
                     link.click();
@@ -71,7 +85,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                     setShowBorder(true);
                     setShowGrid(true);
                     onSelect(previousSelection);
-                }, 50);
+                }, EXPORT_DELAY_MS);
             }
         }
     }));
@@ -87,8 +101,8 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
 
                 // Center the mat initially
                 const newScale = Math.min(
-                    (container.offsetWidth - 40) / matWidth,
-                    (container.offsetHeight - 40) / matHeight
+                    (container.offsetWidth - CANVAS_PADDING) / matWidth,
+                    (container.offsetHeight - CANVAS_PADDING) / matHeight
                 );
                 setScale(newScale);
                 setPosition({
@@ -106,7 +120,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
 
     const handleWheel = (e) => {
         e.evt.preventDefault();
-        const scaleBy = 1.1;
+        const scaleBy = ZOOM_SCALE_BY;
         const stage = stageRef.current;
         const oldScale = stage.scaleX();
         const pointer = stage.getPointerPosition();
@@ -205,8 +219,8 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                             y={0}
                             width={matWidth}
                             height={matHeight}
-                            stroke="#ddd"
-                            strokeWidth={1}
+                            stroke={UI_COLORS.borderStroke}
+                            strokeWidth={UI_COLORS.borderStrokeWidth}
                             listening={false}
                         />
                     )}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Image as ImageIcon, Type, Square, Download, Settings } from 'lucide-react';
+import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone }) => {
@@ -159,10 +160,12 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                                 value={dpi}
                                 onChange={(e) => onSetDpi(Number(e.target.value))}
                             >
-                                <option value={96}>96 DPI (Screen)</option>
-                                <option value={150}>150 DPI (Draft Print)</option>
-                                <option value={300}>300 DPI (High Quality)</option>
-                                <option value={600}>600 DPI (Professional)</option>
+                                <option value={SCREEN_DPI}>{SCREEN_DPI} DPI (Screen)</option>
+                                {AVAILABLE_DPI_OPTIONS.map(dpiValue => (
+                                    <option key={dpiValue} value={dpiValue}>
+                                        {dpiValue} DPI {dpiValue === 150 ? '(Draft Print)' : dpiValue === 300 ? '(High Quality)' : dpiValue === 600 ? '(Professional)' : dpiValue === 1200 ? '(Ultra High)' : ''}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

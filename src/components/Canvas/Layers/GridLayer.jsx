@@ -1,12 +1,11 @@
 import React from 'react';
 import { Layer, Line } from 'react-konva';
+import { SCREEN_DPI, GRID_VISUAL } from '../../../constants';
 
 const GridLayer = ({ width, height, gridSize, unit }) => {
-    const screenDpi = 96;
-
     // Convert grid size from physical units to pixels
     const gridSizeInches = unit === 'cm' ? gridSize / 2.54 : gridSize;
-    const gridSizePx = gridSizeInches * screenDpi;
+    const gridSizePx = gridSizeInches * SCREEN_DPI;
 
     const lines = [];
 
@@ -16,8 +15,8 @@ const GridLayer = ({ width, height, gridSize, unit }) => {
             <Line
                 key={`v-${x}`}
                 points={[x, 0, x, height]}
-                stroke="rgba(255, 255, 255, 0.2)"
-                strokeWidth={1}
+                stroke={GRID_VISUAL.stroke}
+                strokeWidth={GRID_VISUAL.strokeWidth}
                 listening={false}
             />
         );
@@ -29,8 +28,8 @@ const GridLayer = ({ width, height, gridSize, unit }) => {
             <Line
                 key={`h-${y}`}
                 points={[0, y, width, y]}
-                stroke="rgba(255, 255, 255, 0.2)"
-                strokeWidth={1}
+                stroke={GRID_VISUAL.stroke}
+                strokeWidth={GRID_VISUAL.strokeWidth}
                 listening={false}
             />
         );

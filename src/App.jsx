@@ -2,6 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import DesignStage from './components/Canvas/DesignStage';
 import Sidebar from './components/UI/Sidebar';
 import PropertiesPanel from './components/UI/PropertiesPanel';
+import {
+  DEFAULT_MAT_SIZE,
+  DEFAULT_EXPORT_DPI,
+  DEFAULT_GRID_ENABLED,
+  DEFAULT_GRID_SIZE,
+  DEFAULT_UNIT,
+  DEFAULT_ZONE,
+  SCREEN_DPI
+} from './constants';
 import './index.css';
 
 function App() {
@@ -9,11 +18,11 @@ function App() {
   const [backgroundAttrs, setBackgroundAttrs] = useState(null);
   const [zones, setZones] = useState([]);
   const [selectedId, selectShape] = useState(null);
-  const [matSize, setMatSize] = useState({ width: 24, height: 14 }); // Inches
-  const [unit, setUnit] = useState('inch'); // 'inch' or 'cm'
-  const [dpi, setDpi] = useState(300); // Export DPI
-  const [gridEnabled, setGridEnabled] = useState(false);
-  const [gridSize, setGridSize] = useState(0.5); // Grid size in current unit
+  const [matSize, setMatSize] = useState(DEFAULT_MAT_SIZE);
+  const [unit, setUnit] = useState(DEFAULT_UNIT);
+  const [dpi, setDpi] = useState(DEFAULT_EXPORT_DPI);
+  const [gridEnabled, setGridEnabled] = useState(DEFAULT_GRID_ENABLED);
+  const [gridSize, setGridSize] = useState(DEFAULT_GRID_SIZE);
   const [copiedZone, setCopiedZone] = useState(null);
   const stageRef = useRef(null);
 
@@ -31,20 +40,6 @@ function App() {
         }
       }
 
-      // Paste: Ctrl+V or Cmd+V
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        if (copiedZone) {
-          const newZone = {
-            ...copiedZone,
-            id: `zone-${Date.now()}`,
-            x: copiedZone.x + (gridEnabled ? gridSize * 96 : 20),
-            y: copiedZone.y + (gridEnabled ? gridSize * 96 : 20),
-          };
-          setZones([...zones, newZone]);
-          selectShape(newZone.id);
-          e.preventDefault();
-        }
-      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -73,12 +68,10 @@ function App() {
 
   const handleAddZone = () => {
     const newZone = {
+      ...DEFAULT_ZONE,
       id: `zone-${zones.length + 1}`,
       x: 100,
       y: 100,
-      width: 100,
-      height: 150,
-      type: 'card',
     };
     setZones([...zones, newZone]);
   };

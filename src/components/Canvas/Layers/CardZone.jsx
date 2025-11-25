@@ -1,8 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import { Rect, Transformer, Group, Text, Image } from 'react-konva';
 import useImage from 'use-image';
+import {
+    DEFAULT_GRID_ENABLED,
+    DEFAULT_GRID_SIZE,
+    DEFAULT_UNIT,
+    SCREEN_DPI
+} from '../../../constants';
 
-const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = false, gridSize = 0.5, unit = 'inch', isPanning = false }) => {
+const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false }) => {
     const shapeRef = useRef();
     const trRef = useRef();
     const [zoneImage] = useImage(shapeProps.zoneImage || '');
@@ -11,9 +17,8 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = fa
     const snapToGrid = (value) => {
         if (!gridEnabled) return value;
 
-        const screenDpi = 96;
         const gridSizeInches = unit === 'cm' ? gridSize / 2.54 : gridSize;
-        const gridSizePx = gridSizeInches * screenDpi;
+        const gridSizePx = gridSizeInches * SCREEN_DPI;
 
         return Math.round(value / gridSizePx) * gridSizePx;
     };
