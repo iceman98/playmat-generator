@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
 
-const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSelected, onSelect, width, height }) => {
+const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSelected, onSelect, width, height, isPanning = false }) => {
     const [image] = useImage(imageUrl, 'anonymous');
     const imageNodeRef = useRef(null);
     const trRef = useRef(null);
@@ -49,9 +49,10 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
     return (
         <React.Fragment>
             <KonvaImage
+                name="backgroundImage"
                 image={image}
                 ref={imageNodeRef}
-                draggable
+                draggable={!isPanning}
                 onClick={onSelect}
                 onTap={onSelect}
                 onDragEnd={(e) => {

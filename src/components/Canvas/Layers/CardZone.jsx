@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Rect, Transformer, Group, Text, Image } from 'react-konva';
 import useImage from 'use-image';
 
-const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = false, gridSize = 0.5, unit = 'inch' }) => {
+const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = false, gridSize = 0.5, unit = 'inch', isPanning = false }) => {
     const shapeRef = useRef();
     const trRef = useRef();
     const [zoneImage] = useImage(shapeProps.zoneImage || '');
@@ -30,7 +30,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = fa
     return (
         <React.Fragment>
             <Group
-                draggable
+                draggable={!isPanning}
                 onClick={onSelect}
                 onTap={onSelect}
                 x={shapeProps.x}

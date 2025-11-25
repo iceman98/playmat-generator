@@ -12,6 +12,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [showBorder, setShowBorder] = useState(true);
     const [showGrid, setShowGrid] = useState(true);
+    const [isPanning, setIsPanning] = useState(false);
 
     // Mat dimensions in inches (Standard MTG Playmat)
     const matWidthInches = matSize.width;
@@ -124,12 +125,46 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
         setScale(newScale);
     };
 
-    const checkDeselect = (e) => {
-        // deselect when clicked on empty area
-        const clickedOnEmpty = e.target === e.target.getStage();
-        if (clickedOnEmpty) {
+    const lastMousePos = useRef({ x: 0, y: 0 });
+
+    const handleMouseDown = (e) => {
+        // Enable panning on middle-click (button 1) or left-click (button 0) on empty stage ONLY
+        const isMiddleClick = e.evt.button === 1;
+        const isLeftClick = e.evt.button === 0;
+
+        // Check if target is strictly the stage (empty area)
+        // We do NOT include the background image here, so left-drag on background moves the image
+        const isEmptyStage = e.target === e.target.getStage();
+
+        if (isMiddleClick || (isLeftClick && isEmptyStage)) {
+            e.evt.preventDefault();
+            setIsPanning(true);
+            lastMousePos.current = { x: e.evt.clientX, y: e.evt.clientY };
+        }
+
+        // Deselect when clicking on empty area (Stage)
+        if (isEmptyStage && isLeftClick) {
             onSelect(null);
         }
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isPanning) return;
+
+        const dx = e.evt.clientX - lastMousePos.current.x;
+        const dy = e.evt.clientY - lastMousePos.current.y;
+
+        setPosition((prev) => ({
+            x: prev.x + dx,
+            y: prev.y + dy,
+        }));
+
+        lastMousePos.current = { x: e.evt.clientX, y: e.evt.clientY };
+    };
+
+    const handleMouseUp = (e) => {
+        // Disable panning when mouse button is released
+        setIsPanning(false);
     };
 
     return (
@@ -138,13 +173,15 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                 width={stageSize.width}
                 height={stageSize.height}
                 onWheel={handleWheel}
-                onMouseDown={checkDeselect}
-                onTouchStart={checkDeselect}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onTouchStart={handleMouseDown}
                 scaleX={scale}
                 scaleY={scale}
                 x={position.x}
                 y={position.y}
-                draggable
+                draggable={false}
                 ref={stageRef}
                 className={styles.stage}
             >
@@ -158,6 +195,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                         onSelect={() => onSelect('background')}
                         width={matWidth}
                         height={matHeight}
+                        isPanning={isPanning}
                     />
 
                     {/* Mat Background (The physical area of the mat) - rendered behind if transparent, or as base */}
@@ -195,6 +233,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                             gridEnabled={gridEnabled}
                             gridSize={gridSize}
                             unit={unit}
+                            isPanning={isPanning}
                         />
                     ))}
                 </Layer>
