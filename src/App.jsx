@@ -9,6 +9,7 @@ import {
   DEFAULT_GRID_SIZE,
   DEFAULT_UNIT,
   DEFAULT_ZONE,
+  DEFAULT_ZONE_SIZE_CM,
   SCREEN_DPI
 } from './constants';
 import './index.css';
@@ -86,11 +87,19 @@ function App() {
   };
 
   const handleAddZone = () => {
+    // Convert zone size from cm to inches to pixels
+    const widthInches = DEFAULT_ZONE_SIZE_CM.width / 2.54;
+    const heightInches = DEFAULT_ZONE_SIZE_CM.height / 2.54;
+    const widthPx = widthInches * SCREEN_DPI;
+    const heightPx = heightInches * SCREEN_DPI;
+
     const newZone = {
       ...DEFAULT_ZONE,
       id: `zone-${zones.length + 1}`,
       x: 100,
       y: 100,
+      width: widthPx,
+      height: heightPx,
     };
     setZones([...zones, newZone]);
   };

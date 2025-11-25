@@ -212,8 +212,9 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                         <label>Width</label>
                         <input
                             type="number"
+                            step="0.1"
                             className={styles.input}
-                            value={toUnit(selectedZone.width).toFixed(2)}
+                            value={Math.round(toUnit(selectedZone.width) * 100) / 100}
                             onChange={(e) => handleChange('width', fromUnit(Number(e.target.value)))}
                         />
                     </div>
@@ -221,8 +222,9 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                         <label>Height</label>
                         <input
                             type="number"
+                            step="0.1"
                             className={styles.input}
-                            value={toUnit(selectedZone.height).toFixed(2)}
+                            value={Math.round(toUnit(selectedZone.height) * 100) / 100}
                             onChange={(e) => handleChange('height', fromUnit(Number(e.target.value)))}
                         />
                     </div>

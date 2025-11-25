@@ -36,9 +36,14 @@ export const ZOOM_SCALE_BY = 1.1;
 // ----------------------------------------------------------------------------
 // ZONE DEFAULTS
 // ----------------------------------------------------------------------------
+// Default zone size in cm (will be converted to pixels based on display)
+export const DEFAULT_ZONE_SIZE_CM = {
+    width: 6.3,   // cm 
+    height: 8.8, // cm - roughly card-sized
+};
+
 export const DEFAULT_ZONE = {
-    width: 96,  // pixels (1 inch at 96 DPI)
-    height: 96, // pixels (1 inch at 96 DPI)
+    // width and height will be set dynamically based on unit
     fill: 'rgba(255, 255, 255, 0.3)',
     stroke: '#000000',
     strokeWidth: 2,
