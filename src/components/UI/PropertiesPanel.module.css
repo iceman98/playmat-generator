@@ -1,69 +1,99 @@
 .panel {
-    width: 300px;
-    background-color: var(--sidebar-bg);
-    border-left: 1px solid var(--border-color);
+    width: 320px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 1px solid var(--panel-border);
     display: flex;
     flex-direction: column;
     height: 100%;
     overflow-y: auto;
-    padding: 1rem;
     color: var(--text-primary);
+    box-shadow: var(--shadow-lg);
 }
 
 .header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(8px);
 }
 
 .header h3 {
     margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--accent-color);
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .section {
-    margin-bottom: 1.5rem;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .section h4 {
-    margin: 0 0 0.75rem 0;
-    font-size: 0.9rem;
+    margin: 0 0 16px 0;
+    font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
     color: var(--text-secondary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
 }
 
 .controlGroup {
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
 }
 
 .controlGroup label {
     display: block;
-    font-size: 0.85rem;
-    margin-bottom: 0.4rem;
+    font-size: 13px;
+    margin-bottom: 8px;
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .input {
     width: 100%;
-    padding: 0.5rem;
-    background-color: var(--input-bg);
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 14px;
+    transition: all var(--transition-base);
 }
 
 .input:focus {
     outline: none;
-    border-color: var(--accent-color);
+    border-color: var(--accent-primary);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .row {
     display: flex;
-    gap: 0.5rem;
+    gap: 10px;
 }
 
 .col {
@@ -72,38 +102,116 @@
 
 .colorPicker {
     width: 100%;
-    height: 36px;
-    padding: 0;
-    border: none;
-    border-radius: 4px;
+    height: 40px;
+    padding: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     cursor: pointer;
-    background: none;
+    background: rgba(0, 0, 0, 0.3);
+    transition: all var(--transition-base);
+}
+
+.colorPicker:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-sm);
 }
 
 .slider {
     width: 100%;
-    accent-color: var(--accent-color);
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+    transition: all var(--transition-base);
+}
+
+.slider:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .buttonGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .actionButton {
-    background: var(--bg-tertiary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 8px;
-    border-radius: 4px;
+    padding: 10px 14px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.actionButton::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-base);
 }
 
 .actionButton:hover {
-    background: var(--bg-secondary);
-    border-color: var(--accent-color);
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.actionButton:hover::before {
+    opacity: 0.2;
+}
+
+.actionButton:active {
+    transform: translateY(0);
+}
+
+/* Checkbox Styling */
+.controlGroup input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
 }
