@@ -1,0 +1,560 @@
+import React from 'react';
+import { X, Type, Box, Palette, Move, RotateCw, Maximize, Image as ImageIcon } from 'lucide-react';
+import styles from './PropertiesPanel.module.css';
+
+const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
+    if (!selectedZone && !isBackground) return null;
+
+    const dpi = 96;
+
+    const toUnit = (px) => {
+        if (unit === 'inch') return px / dpi;
+        return (px / dpi) * 2.54;
+    };
+
+    const fromUnit = (val) => {
+        if (unit === 'inch') return val * dpi;
+        return (val / 2.54) * dpi;
+    };
+
+    const handleChange = (key, value) => {
+        if (isBackground) {
+            onUpdateBackground({ ...backgroundAttrs, [key]: value });
+        } else {
+            onUpdateZone({ ...selectedZone, [key]: value });
+        }
+    };
+
+    if (isBackground) {
+        const bgWidth = backgroundAttrs?.imageWidth ? backgroundAttrs.imageWidth * (backgroundAttrs.scaleX || 1) : 0;
+        const bgHeight = backgroundAttrs?.imageHeight ? backgroundAttrs.imageHeight * (backgroundAttrs.scaleY || 1) : 0;
+
+        return (
+            <div className={styles.panel}>
+                <div className={styles.header}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3>Background</h3>
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                            <X size={18} />
+                        </button>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h4><Maximize size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Dimensions ({unit})</h4>
+                    <div className={styles.row}>
+                        <div className={`${styles.controlGroup} ${styles.col}`}>
+                            <label>Width</label>
+                            <input
+                                type="number"
+                                className={styles.input}
+                                value={toUnit(bgWidth).toFixed(2)}
+                                onChange={(e) => {
+                                    if (!backgroundAttrs?.imageWidth) return;
+                                    const newWidthPx = fromUnit(Number(e.target.value));
+                                    const newScale = newWidthPx / backgroundAttrs.imageWidth;
+                                    handleChange('scaleX', newScale);
+                                    handleChange('scaleY', newScale);
+                                }}
+                            />
+                        </div>
+                        <div className={`${styles.controlGroup} ${styles.col}`}>
+                            <label>Height</label>
+                            <input
+                                type="number"
+                                className={styles.input}
+                                value={toUnit(bgHeight).toFixed(2)}
+                                onChange={(e) => {
+                                    if (!backgroundAttrs?.imageHeight) return;
+                                    const newHeightPx = fromUnit(Number(e.target.value));
+                                    const newScale = newHeightPx / backgroundAttrs.imageHeight;
+                                    handleChange('scaleY', newScale);
+                                    handleChange('scaleX', newScale);
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h4><Move size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Transform</h4>
+
+                    <div className={styles.controlGroup}>
+                        <label>Scale X</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            className={styles.input}
+                            value={backgroundAttrs?.scaleX?.toFixed(2) || 1}
+                            onChange={(e) => handleChange('scaleX', Number(e.target.value))}
+                        />
+                    </div>
+                    <div className={styles.controlGroup}>
+                        <label>Scale Y</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            className={styles.input}
+                            value={backgroundAttrs?.scaleY?.toFixed(2) || 1}
+                            onChange={(e) => handleChange('scaleY', Number(e.target.value))}
+                        />
+                    </div>
+                    <div className={styles.controlGroup}>
+                        <label>Rotation (deg)</label>
+                        <input
+                            type="number"
+                            className={styles.input}
+                            value={Math.round(backgroundAttrs?.rotation || 0)}
+                            onChange={(e) => handleChange('rotation', Number(e.target.value))}
+                        />
+                    </div>
+                    <div className={styles.row}>
+                        <div className={`${styles.controlGroup} ${styles.col}`}>
+                            <label>X</label>
+                            <input
+                                type="number"
+                                className={styles.input}
+                                value={Math.round(backgroundAttrs?.x || 0)}
+                                onChange={(e) => handleChange('x', Number(e.target.value))}
+                            />
+                        </div>
+                        <div className={`${styles.controlGroup} ${styles.col}`}>
+                            <label>Y</label>
+                            <input
+                                type="number"
+                                className={styles.input}
+                                value={Math.round(backgroundAttrs?.y || 0)}
+                                onChange={(e) => handleChange('y', Number(e.target.value))}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h4>Quick Actions</h4>
+                    <div className={styles.buttonGrid}>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageWidth) return;
+                                const matWidthPx = matSize.width * dpi;
+                                const scale = matWidthPx / backgroundAttrs.imageWidth;
+                                handleChange('scaleX', scale);
+                                handleChange('scaleY', scale);
+                                handleChange('x', 0);
+                                handleChange('y', (matSize.height * dpi - backgroundAttrs.imageHeight * scale) / 2);
+                            }}
+                        >
+                            Fit Width
+                        </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageHeight) return;
+                                const matHeightPx = matSize.height * dpi;
+                                const scale = matHeightPx / backgroundAttrs.imageHeight;
+                                handleChange('scaleX', scale);
+                                handleChange('scaleY', scale);
+                                handleChange('x', (matSize.width * dpi - backgroundAttrs.imageWidth * scale) / 2);
+                                handleChange('y', 0);
+                            }}
+                        >
+                            Fit Height
+                        </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageWidth || !backgroundAttrs?.imageHeight) return;
+                                const matWidthPx = matSize.width * dpi;
+                                const matHeightPx = matSize.height * dpi;
+                                const scale = Math.max(matWidthPx / backgroundAttrs.imageWidth, matHeightPx / backgroundAttrs.imageHeight);
+                                handleChange('scaleX', scale);
+                                handleChange('scaleY', scale);
+                                handleChange('x', (matWidthPx - backgroundAttrs.imageWidth * scale) / 2);
+                                handleChange('y', (matHeightPx - backgroundAttrs.imageHeight * scale) / 2);
+                            }}
+                        >
+                            Fill Mat
+                        </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                handleChange('scaleX', 1);
+                                handleChange('scaleY', 1);
+                                handleChange('rotation', 0);
+                                handleChange('x', 0);
+                                handleChange('y', 0);
+                            }}
+                        >
+                            Reset 1:1
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className={styles.panel}>
+            <div className={styles.header}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3>Properties</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                        <X size={18} />
+                    </button>
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <h4><Maximize size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Dimensions ({unit})</h4>
+                <div className={styles.row}>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Width</label>
+                        <input
+                            type="number"
+                            className={styles.input}
+                            value={toUnit(selectedZone.width).toFixed(2)}
+                            onChange={(e) => handleChange('width', fromUnit(Number(e.target.value)))}
+                        />
+                    </div>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Height</label>
+                        <input
+                            type="number"
+                            className={styles.input}
+                            value={toUnit(selectedZone.height).toFixed(2)}
+                            onChange={(e) => handleChange('height', fromUnit(Number(e.target.value)))}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <h4><Type size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Text</h4>
+
+                <div className={styles.controlGroup}>
+                    <label>Content</label>
+                    <input
+                        type="text"
+                        className={styles.input}
+                        value={selectedZone.text || ''}
+                        onChange={(e) => handleChange('text', e.target.value)}
+                        placeholder="Zone Label"
+                    />
+                </div>
+
+                <div className={styles.row}>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Size</label>
+                        <input
+                            type="number"
+                            className={styles.input}
+                            value={selectedZone.fontSize || 14}
+                            onChange={(e) => handleChange('fontSize', Number(e.target.value))}
+                        />
+                    </div>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Color</label>
+                        <input
+                            type="color"
+                            className={styles.colorPicker}
+                            value={selectedZone.textColor || '#ffffff'}
+                            onChange={(e) => handleChange('textColor', e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>Font Family</label>
+                    <select
+                        className={styles.input}
+                        value={selectedZone.fontFamily || 'Arial'}
+                        onChange={(e) => handleChange('fontFamily', e.target.value)}
+                    >
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                    </select>
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>Position</label>
+                    <select
+                        className={styles.input}
+                        value={selectedZone.textPosition || 'center'}
+                        onChange={(e) => handleChange('textPosition', e.target.value)}
+                    >
+                        <option value="center">Center</option>
+                        <option value="top">Top (Inside)</option>
+                        <option value="bottom">Bottom (Inside)</option>
+                        <option value="top-out">Top (Outside)</option>
+                        <option value="bottom-out">Bottom (Outside)</option>
+                    </select>
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>Text Outline Width: {selectedZone.textStroke || 0}px</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        className={styles.slider}
+                        value={selectedZone.textStroke || 0}
+                        onChange={(e) => handleChange('textStroke', Number(e.target.value))}
+                    />
+                </div>
+
+                {selectedZone.textStroke > 0 && (
+                    <div className={styles.controlGroup}>
+                        <label>Outline Color</label>
+                        <input
+                            type="color"
+                            className={styles.colorPicker}
+                            value={selectedZone.textStrokeColor || '#000000'}
+                            onChange={(e) => handleChange('textStrokeColor', e.target.value)}
+                        />
+                    </div>
+                )}
+
+                <div className={styles.controlGroup}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={selectedZone.textShadow || false}
+                            onChange={(e) => handleChange('textShadow', e.target.checked)}
+                            style={{ marginRight: '8px' }}
+                        />
+                        Text Shadow
+                    </label>
+                </div>
+
+                {selectedZone.textShadow && (
+                    <>
+                        <div className={styles.row}>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow X</label>
+                                <input
+                                    type="number"
+                                    className={styles.input}
+                                    value={selectedZone.textShadowX || 2}
+                                    onChange={(e) => handleChange('textShadowX', Number(e.target.value))}
+                                />
+                            </div>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow Y</label>
+                                <input
+                                    type="number"
+                                    className={styles.input}
+                                    value={selectedZone.textShadowY || 2}
+                                    onChange={(e) => handleChange('textShadowY', Number(e.target.value))}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.row}>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow Blur</label>
+                                <input
+                                    type="number"
+                                    className={styles.input}
+                                    value={selectedZone.textShadowBlur || 3}
+                                    onChange={(e) => handleChange('textShadowBlur', Number(e.target.value))}
+                                />
+                            </div>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow Color</label>
+                                <input
+                                    type="color"
+                                    className={styles.colorPicker}
+                                    value={selectedZone.textShadowColor || '#000000'}
+                                    onChange={(e) => handleChange('textShadowColor', e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            <div className={styles.section}>
+                <h4><ImageIcon size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Zone Image</h4>
+
+                <div className={styles.controlGroup}>
+                    <label>Image URL</label>
+                    <input
+                        type="text"
+                        className={styles.input}
+                        value={selectedZone.zoneImage || ''}
+                        onChange={(e) => handleChange('zoneImage', e.target.value)}
+                        placeholder="https://..."
+                    />
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>Upload Image</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                    handleChange('zoneImage', event.target.result);
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }}
+                        className={styles.input}
+                    />
+                </div>
+
+                {selectedZone.zoneImage && (
+                    <button
+                        className={styles.actionButton}
+                        onClick={() => handleChange('zoneImage', null)}
+                        style={{ marginTop: '8px', width: '100%' }}
+                    >
+                        Remove Image
+                    </button>
+                )}
+            </div>
+
+            <div className={styles.section}>
+                <h4><Box size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Border & Fill</h4>
+
+                <div className={styles.row}>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Border Color</label>
+                        <input
+                            type="color"
+                            className={styles.colorPicker}
+                            value={selectedZone.stroke || '#000000'}
+                            onChange={(e) => handleChange('stroke', e.target.value)}
+                        />
+                    </div>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Fill Color</label>
+                        <input
+                            type="color"
+                            className={styles.colorPicker}
+                            value={selectedZone.fill || 'rgba(255,255,255,0.3)'}
+                            onChange={(e) => handleChange('fill', e.target.value)}
+                            disabled={selectedZone.noFill}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={selectedZone.noFill || false}
+                            onChange={(e) => handleChange('noFill', e.target.checked)}
+                            style={{ marginRight: '8px' }}
+                        />
+                        Transparent Fill (No Fill)
+                    </label>
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>Border Thickness: {selectedZone.strokeWidth || 2}px</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="20"
+                        className={styles.slider}
+                        value={selectedZone.strokeWidth || 2}
+                        onChange={(e) => handleChange('strokeWidth', Number(e.target.value))}
+                    />
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={selectedZone.borderShadow || false}
+                            onChange={(e) => handleChange('borderShadow', e.target.checked)}
+                            style={{ marginRight: '8px' }}
+                        />
+                        Border Shadow
+                    </label>
+                </div>
+
+                {selectedZone.borderShadow && (
+                    <>
+                        <div className={styles.row}>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow X</label>
+                                <input
+                                    type="number"
+                                    className={styles.input}
+                                    value={selectedZone.borderShadowX || 3}
+                                    onChange={(e) => handleChange('borderShadowX', Number(e.target.value))}
+                                />
+                            </div>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow Y</label>
+                                <input
+                                    type="number"
+                                    className={styles.input}
+                                    value={selectedZone.borderShadowY || 3}
+                                    onChange={(e) => handleChange('borderShadowY', Number(e.target.value))}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.row}>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow Blur</label>
+                                <input
+                                    type="number"
+                                    className={styles.input}
+                                    value={selectedZone.borderShadowBlur || 5}
+                                    onChange={(e) => handleChange('borderShadowBlur', Number(e.target.value))}
+                                />
+                            </div>
+                            <div className={`${styles.controlGroup} ${styles.col}`}>
+                                <label>Shadow Color</label>
+                                <input
+                                    type="color"
+                                    className={styles.colorPicker}
+                                    value={selectedZone.borderShadowColor || '#000000'}
+                                    onChange={(e) => handleChange('borderShadowColor', e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                <div className={styles.controlGroup}>
+                    <label>Corner Radius: {selectedZone.cornerRadius || 0}px</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="50"
+                        className={styles.slider}
+                        value={selectedZone.cornerRadius || 0}
+                        onChange={(e) => handleChange('cornerRadius', Number(e.target.value))}
+                    />
+                </div>
+
+                <div className={styles.controlGroup}>
+                    <label>Opacity: {selectedZone.opacity || 1}</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        className={styles.slider}
+                        value={selectedZone.opacity !== undefined ? selectedZone.opacity : 1}
+                        onChange={(e) => handleChange('opacity', Number(e.target.value))}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default PropertiesPanel;

@@ -1,0 +1,27 @@
+.container {
+    flex: 1;
+    height: 100%;
+    background-color: var(--canvas-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.stage {
+    background-color: transparent;
+}
+
+.controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: white;
+    pointer-events: none;
+}
+
+.zoomInfo {
+    font-size: 14px;
+    font-weight: 500;
+}
