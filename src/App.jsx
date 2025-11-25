@@ -66,10 +66,14 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedId, zones, copiedZone, gridEnabled, gridSize]);
 
-  // Delete zone with Delete/Backspace key
+
+  // Delete zone with Delete key only (but not when typing in inputs)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && selectedId !== 'background') {
+      // Don't delete if user is typing in an input or textarea
+      const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+
+      if (e.key === 'Delete' && selectedId && selectedId !== 'background' && !isTyping) {
         e.preventDefault();
         setZones(zones.filter(z => z.id !== selectedId));
         selectShape(null);

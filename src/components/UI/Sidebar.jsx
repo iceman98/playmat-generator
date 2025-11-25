@@ -7,6 +7,11 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
 
+    // Select all text when focusing on numeric inputs
+    const handleFocus = (e) => {
+        e.target.select();
+    };
+
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchQuery) {

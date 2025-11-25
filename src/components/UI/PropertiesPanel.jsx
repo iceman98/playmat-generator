@@ -25,6 +25,11 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
         }
     };
 
+    // Select all text when focusing on numeric inputs
+    const handleFocus = (e) => {
+        e.target.select();
+    };
+
     if (isBackground) {
         const bgWidth = backgroundAttrs?.imageWidth ? backgroundAttrs.imageWidth * (backgroundAttrs.scaleX || 1) : 0;
         const bgHeight = backgroundAttrs?.imageHeight ? backgroundAttrs.imageHeight * (backgroundAttrs.scaleY || 1) : 0;
@@ -216,6 +221,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             className={styles.input}
                             value={Math.round(toUnit(selectedZone.width) * 100) / 100}
                             onChange={(e) => handleChange('width', fromUnit(Number(e.target.value)))}
+                            onFocus={handleFocus}
                         />
                     </div>
                     <div className={`${styles.controlGroup} ${styles.col}`}>
@@ -226,6 +232,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             className={styles.input}
                             value={Math.round(toUnit(selectedZone.height) * 100) / 100}
                             onChange={(e) => handleChange('height', fromUnit(Number(e.target.value)))}
+                            onFocus={handleFocus}
                         />
                     </div>
                 </div>
