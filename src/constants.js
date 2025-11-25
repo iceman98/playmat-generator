@@ -3,27 +3,27 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// MAT DIMENSIONS
+// MAT DIMENSIONS (stored internally in centimeters)
 // ----------------------------------------------------------------------------
 export const DEFAULT_MAT_SIZE = {
-    width: 24,  // inches
-    height: 14, // inches
+    width: 60,  // cm (~24 inches)
+    height: 35, // cm (~14 inches)
 };
 
 // ----------------------------------------------------------------------------
 // DISPLAY & EXPORT SETTINGS
 // ----------------------------------------------------------------------------
 export const SCREEN_DPI = 96; // Screen DPI for display
-export const DEFAULT_EXPORT_DPI = 300; // Default DPI for export
+export const DEFAULT_EXPORT_DPI = 150; // Default DPI for export
 
 export const AVAILABLE_DPI_OPTIONS = [150, 300, 600, 1200];
 
 // ----------------------------------------------------------------------------
-// GRID SETTINGS
+// GRID SETTINGS (stored internally in centimeters)
 // ----------------------------------------------------------------------------
-export const DEFAULT_GRID_ENABLED = false;
-export const DEFAULT_GRID_SIZE = 0.5; // inches or cm depending on unit
-export const DEFAULT_UNIT = 'inch'; // 'inch' or 'cm'
+export const DEFAULT_GRID_ENABLED = true;
+export const DEFAULT_GRID_SIZE = 1; // cm (0.5 inches)
+export const DEFAULT_UNIT = 'cm'; // 'inch' or 'cm' - display unit only
 
 // ----------------------------------------------------------------------------
 // CANVAS SETTINGS
@@ -46,9 +46,9 @@ export const DEFAULT_ZONE = {
     opacity: 1,
     text: 'Card Zone',
     fontSize: 14,
-    fontFamily: 'Arial',
+    fontFamily: 'Impact',
     textColor: 'white',
-    textPosition: 'center', // 'top', 'bottom', 'center', 'top-out', 'bottom-out'
+    textPosition: 'bottom-out', // 'top', 'bottom', 'center', 'top-out', 'bottom-out'
     noFill: false,
     textStroke: 0,
     textStrokeColor: '#000000',

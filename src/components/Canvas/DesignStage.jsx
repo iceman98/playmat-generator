@@ -29,9 +29,9 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
     const [showGrid, setShowGrid] = useState(DEFAULT_SHOW_GRID);
     const [isPanning, setIsPanning] = useState(false);
 
-    // Mat dimensions in inches (Standard MTG Playmat)
-    const matWidthInches = matSize.width;
-    const matHeightInches = matSize.height;
+    // Mat dimensions: convert from internal cm storage to inches for pixel calculation
+    const matWidthInches = matSize.width / 2.54;
+    const matHeightInches = matSize.height / 2.54;
 
     const matWidth = matWidthInches * SCREEN_DPI;
     const matHeight = matHeightInches * SCREEN_DPI;

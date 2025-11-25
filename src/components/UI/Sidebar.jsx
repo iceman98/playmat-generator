@@ -129,7 +129,10 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                                             </span>
                                         </div>
                                         <div className={styles.zoneItemInfo}>
-                                            {(zone.width / 96).toFixed(2)}" × {(zone.height / 96).toFixed(2)}"
+                                            {unit === 'inch'
+                                                ? `${(zone.width / 96).toFixed(2)}" × ${(zone.height / 96).toFixed(2)}"`
+                                                : `${(zone.width / 96 * 2.54).toFixed(1)} cm × ${(zone.height / 96 * 2.54).toFixed(1)} cm`
+                                            }
                                         </div>
                                     </div>
                                 ))}
@@ -206,10 +209,10 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                                     type="number"
                                     step="0.1"
                                     min="0.1"
-                                    value={unit === 'inch' ? gridSize : (gridSize * 2.54).toFixed(2)}
+                                    value={unit === 'inch' ? Math.round(gridSize / 2.54 * 100) / 100 : Math.round(gridSize * 100) / 100}
                                     onChange={(e) => {
                                         const val = Number(e.target.value);
-                                        onSetGridSize(unit === 'inch' ? val : val / 2.54);
+                                        onSetGridSize(unit === 'inch' ? val * 2.54 : val);
                                     }}
                                     className={styles.input}
                                 />
@@ -220,12 +223,14 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                             <label>Playmat Width ({unit})</label>
                             <input
                                 type="number"
-                                value={unit === 'inch' ? matSize.width : (matSize.width * 2.54).toFixed(2)}
+                                step="0.1"
+                                min="0.1"
+                                value={unit === 'inch' ? Math.round(matSize.width / 2.54 * 100) / 100 : Math.round(matSize.width * 100) / 100}
                                 onChange={(e) => {
                                     const val = Number(e.target.value);
                                     onSetMatSize({
                                         ...matSize,
-                                        width: unit === 'inch' ? val : val / 2.54
+                                        width: unit === 'inch' ? val * 2.54 : val
                                     });
                                 }}
                                 className={styles.input}
@@ -236,12 +241,14 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                             <label>Playmat Height ({unit})</label>
                             <input
                                 type="number"
-                                value={unit === 'inch' ? matSize.height : (matSize.height * 2.54).toFixed(2)}
+                                step="0.1"
+                                min="0.1"
+                                value={unit === 'inch' ? Math.round(matSize.height / 2.54 * 100) / 100 : Math.round(matSize.height * 100) / 100}
                                 onChange={(e) => {
                                     const val = Number(e.target.value);
                                     onSetMatSize({
                                         ...matSize,
-                                        height: unit === 'inch' ? val : val / 2.54
+                                        height: unit === 'inch' ? val * 2.54 : val
                                     });
                                 }}
                                 className={styles.input}

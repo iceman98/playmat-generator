@@ -17,7 +17,8 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
     const snapToGrid = (value) => {
         if (!gridEnabled) return value;
 
-        const gridSizeInches = unit === 'cm' ? gridSize / 2.54 : gridSize;
+        // gridSize is always in cm internally
+        const gridSizeInches = gridSize / 2.54;
         const gridSizePx = gridSizeInches * SCREEN_DPI;
 
         return Math.round(value / gridSizePx) * gridSizePx;

@@ -40,6 +40,25 @@ function App() {
         }
       }
 
+      // Paste: Ctrl+V or Cmd+V
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        if (copiedZone) {
+          // gridSize is in cm, convert to inches then to pixels
+          const gridSizeInches = gridSize / 2.54;
+          const gridSizePx = gridSizeInches * SCREEN_DPI;
+          const offset = gridEnabled ? gridSizePx : 20;
+
+          const newZone = {
+            ...copiedZone,
+            id: `zone-${Date.now()}`,
+            x: copiedZone.x + offset,
+            y: copiedZone.y + offset,
+          };
+          setZones([...zones, newZone]);
+          selectShape(newZone.id);
+          e.preventDefault();
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
