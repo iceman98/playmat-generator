@@ -94,6 +94,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     text={shapeProps.text || "Card Zone"}
                     fontSize={shapeProps.fontSize || 14}
                     fontFamily={shapeProps.fontFamily || 'Arial'}
+                    fontStyle={shapeProps.fontStyle || 'normal'}
                     fill={shapeProps.textColor || "white"}
                     align="center"
                     width={shapeProps.width}

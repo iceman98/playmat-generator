@@ -45,13 +45,14 @@ export const DEFAULT_ZONE_SIZE_CM = {
 export const DEFAULT_ZONE = {
     // width and height will be set dynamically based on unit
     fill: 'rgba(255, 255, 255, 0.3)',
-    stroke: '#000000',
-    strokeWidth: 2,
-    cornerRadius: 0,
-    opacity: 1,
+    stroke: '#ffffff',
+    strokeWidth: 3,
+    cornerRadius: 18,
+    opacity: 0.5,
     text: 'Card Zone',
-    fontSize: 14,
-    fontFamily: 'Impact',
+    fontSize: 28,
+    fontFamily: 'Arial',
+    fontStyle: 'bold',
     textColor: 'white',
     textPosition: 'bottom-out', // 'top', 'bottom', 'center', 'top-out', 'bottom-out'
     noFill: false,

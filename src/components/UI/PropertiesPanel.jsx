@@ -291,6 +291,18 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                 </div>
 
                 <div className={styles.controlGroup}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={selectedZone.fontStyle === 'bold'}
+                            onChange={(e) => handleChange('fontStyle', e.target.checked ? 'bold' : 'normal')}
+                            style={{ marginRight: '8px' }}
+                        />
+                        Bold Text
+                    </label>
+                </div>
+
+                <div className={styles.controlGroup}>
                     <label>Position</label>
                     <select
                         className={styles.input}
