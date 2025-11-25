@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Type, Box, Palette, Move, RotateCw, Maximize, Image as ImageIcon } from 'lucide-react';
 import styles from './PropertiesPanel.module.css';
 
-const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
+const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
     if (!selectedZone && !isBackground) return null;
 
     const dpi = 96;
@@ -552,6 +552,15 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, isBackground, ba
                         onChange={(e) => handleChange('opacity', Number(e.target.value))}
                     />
                 </div>
+            </div>
+
+            <div className={styles.section} style={{ borderBottom: 'none' }}>
+                <button
+                    className={styles.deleteButton}
+                    onClick={onDeleteZone}
+                >
+                    Delete Zone
+                </button>
             </div>
         </div>
     );

@@ -51,6 +51,20 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedId, zones, copiedZone, gridEnabled, gridSize]);
 
+  // Delete zone with Delete/Backspace key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && selectedId !== 'background') {
+        e.preventDefault();
+        setZones(zones.filter(z => z.id !== selectedId));
+        selectShape(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, zones]);
+
 
   const handleSetBackground = (url) => {
     setBackgroundImage(url);
@@ -82,6 +96,13 @@ function App() {
   const handleExport = () => {
     if (stageRef.current) {
       stageRef.current.exportImage();
+    }
+  };
+
+  const handleDeleteZone = () => {
+    if (selectedId && selectedId !== 'background') {
+      setZones(zones.filter(z => z.id !== selectedId));
+      selectShape(null);
     }
   };
 
@@ -122,6 +143,7 @@ function App() {
           selectedZone={zones.find(z => z.id === selectedId)}
           onUpdateZone={handleZoneChange}
           onClose={() => selectShape(null)}
+          onDeleteZone={handleDeleteZone}
           isBackground={selectedId === 'background'}
           backgroundAttrs={backgroundAttrs}
           onUpdateBackground={setBackgroundAttrs}
