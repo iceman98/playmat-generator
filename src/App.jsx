@@ -24,12 +24,8 @@ const LS_KEYS = {
 const saveProjectToLocalStorage = (projectData) => {
   try {
     const dataString = JSON.stringify(projectData);
-    console.log('Stringified project data size:', dataString.length, 'characters');
-    
     localStorage.setItem(LS_KEYS.PROJECT, dataString);
     localStorage.setItem(LS_KEYS.VERSION, '1.0');
-    
-    console.log('Project saved successfully to localStorage');
   } catch (error) {
     console.error('Failed to save project to localStorage:', error);
   }
@@ -39,11 +35,8 @@ const saveProjectToLocalStorage = (projectData) => {
 const loadProjectFromLocalStorage = () => {
   try {
     const savedProject = localStorage.getItem(LS_KEYS.PROJECT);
-    console.log('Raw data from localStorage:', savedProject ? 'Found' : 'Not found');
-    
     if (savedProject) {
       const parsed = JSON.parse(savedProject);
-      console.log('Parsed project data:', parsed);
       return parsed;
     }
   } catch (error) {
@@ -80,49 +73,34 @@ function App() {
   // Load project from localStorage on mount
   useEffect(() => {
     const savedProject = loadProjectFromLocalStorage();
-    console.log('Loading project from localStorage:', savedProject);
     
     if (savedProject) {
       // Restore all project state
       if (savedProject.backgroundImage) {
-        console.log('Restoring backgroundImage:', savedProject.backgroundImage);
         setBackgroundImage(savedProject.backgroundImage);
       }
       if (savedProject.backgroundAttrs) {
-        console.log('Restoring backgroundAttrs:', savedProject.backgroundAttrs);
         setBackgroundAttrs(savedProject.backgroundAttrs);
       }
       if (savedProject.zones) {
-        console.log('Restoring zones:', savedProject.zones);
         setZones(savedProject.zones);
       }
-      if (savedProject.selectedId) {
-        console.log('Restoring selectedId:', savedProject.selectedId);
-        selectShape(savedProject.selectedId);
-      }
+      // selectedId restoration removed - don't restore selection from localStorage
       if (savedProject.matSize) {
-        console.log('Restoring matSize:', savedProject.matSize);
         setMatSize(savedProject.matSize);
       }
       if (savedProject.unit) {
-        console.log('Restoring unit:', savedProject.unit);
         setUnit(savedProject.unit);
       }
       if (savedProject.dpi) {
-        console.log('Restoring dpi:', savedProject.dpi);
         setDpi(savedProject.dpi);
       }
       if (savedProject.gridEnabled !== undefined) {
-        console.log('Restoring gridEnabled:', savedProject.gridEnabled);
         setGridEnabled(savedProject.gridEnabled);
       }
       if (savedProject.gridSize) {
-        console.log('Restoring gridSize:', savedProject.gridSize);
         setGridSize(savedProject.gridSize);
       }
-      console.log('Project loaded successfully from localStorage');
-    } else {
-      console.log('No saved project found in localStorage');
     }
     
     // Set loading to false after loading is complete
@@ -138,7 +116,7 @@ function App() {
       backgroundImage,
       backgroundAttrs,
       zones,
-      selectedId,
+      // selectedId removed - don't save selection to localStorage
       matSize,
       unit,
       dpi,
@@ -147,21 +125,9 @@ function App() {
       timestamp: Date.now()
     };
     
-    console.log('Saving project to localStorage:', {
-      zonesCount: zones.length,
-      hasBackgroundImage: !!backgroundImage,
-      hasBackgroundAttrs: !!backgroundAttrs,
-      selectedId,
-      matSize,
-      unit,
-      dpi,
-      gridEnabled,
-      gridSize
-    });
-    
     saveProjectToLocalStorage(projectData);
     setLastSaved(Date.now());
-  }, [backgroundImage, backgroundAttrs, zones, selectedId, matSize, unit, dpi, gridEnabled, gridSize]);
+  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize]);
 
   // Create new project function
   const handleNewProject = () => {

@@ -20,7 +20,6 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
 
     const handleChange = (key, value) => {
         try {
-            console.log('handleChange called:', { key, value, selectedZone, isBackground });
             if (isBackground) {
                 onUpdateBackground({ ...backgroundAttrs, [key]: value });
             } else {
@@ -280,7 +279,6 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             color={selectedZone.textColor || '#ffffff'}
                             onChange={(colorData) => {
                                 try {
-                                    console.log('Color picker onChange:', colorData);
                                     // Safety check for colorData structure
                                     if (!colorData || !colorData.rgba) {
                                         console.error('Invalid colorData:', colorData);
@@ -360,7 +358,6 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             color={selectedZone.textStrokeColor || '#000000'}
                             onChange={(colorData) => {
                                 try {
-                                    console.log('TextStrokeColor picker onChange:', colorData);
                                     if (!colorData || !colorData.rgba) {
                                         console.error('Invalid colorData:', colorData);
                                         return;
@@ -502,7 +499,6 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             color={selectedZone.stroke || '#000000'}
                             onChange={(colorData) => {
                                 try {
-                                    console.log('Stroke picker onChange:', colorData);
                                     if (!colorData || !colorData.rgba) {
                                         console.error('Invalid colorData:', colorData);
                                         return;
@@ -521,7 +517,6 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             color={selectedZone.fill || 'rgba(255,255,255,0.3)'}
                             onChange={(colorData) => {
                                 try {
-                                    console.log('Fill picker onChange:', colorData);
                                     if (!colorData || !colorData.rgba) {
                                         console.error('Invalid colorData:', colorData);
                                         return;

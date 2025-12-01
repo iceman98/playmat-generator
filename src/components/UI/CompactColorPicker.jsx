@@ -247,7 +247,6 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
       top = margin;
     }
     
-    console.log('Simple viewport positioning:', { top, left });
     return { top, left };
   };
   
