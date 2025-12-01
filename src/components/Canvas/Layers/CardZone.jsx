@@ -41,6 +41,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                 onTap={onSelect}
                 x={shapeProps.x}
                 y={shapeProps.y}
+                onDragStart={onSelect}
                 onDragEnd={(e) => {
                     onChange({
                         ...shapeProps,

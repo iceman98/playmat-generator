@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
 
@@ -6,6 +6,69 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
     const [image] = useImage(imageUrl, 'anonymous');
     const imageNodeRef = useRef(null);
     const trRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStartedWithMiddleClick, setDragStartedWithMiddleClick] = useState(false);
+
+    const handleMouseDown = (e) => {
+        console.log('Mouse down event:', {
+            button: e.evt?.button,
+            buttons: e.evt?.buttons,
+            which: e.evt?.which,
+            type: e.evt?.type,
+            currentTarget: e.currentTarget?.name
+        });
+        
+        // Check if mouse down was with middle click (button 1, which 2, buttons 4)
+        const isMiddleClick = e.evt?.button === 1 || e.evt?.which === 2 || (e.evt?.buttons & 4) === 4;
+        
+        if (isMiddleClick) {
+            console.log('Middle click detected - not selecting background');
+            setDragStartedWithMiddleClick(true);
+            // Only select if already selected
+            if (isSelected) {
+                console.log('Background was already selected, maintaining selection');
+                onSelect();
+            } else {
+                console.log('Background not selected, preventing selection');
+                e.evt?.preventDefault();
+                e.evt?.stopPropagation();
+            }
+        } else {
+            console.log('Normal click detected - selecting background');
+            setDragStartedWithMiddleClick(false);
+            // Normal mouse down - select the background
+            onSelect();
+        }
+    };
+
+    const handleClick = (e) => {
+        // Prevent click if it was a middle-click drag
+        if (dragStartedWithMiddleClick) {
+            console.log('Preventing click after middle-click drag');
+            e.evt?.preventDefault();
+            e.evt?.stopPropagation();
+            return;
+        }
+        
+        console.log('Normal click - selecting background');
+        onSelect();
+    };
+
+    const handleDragStart = (e) => {
+        setIsDragging(true);
+        // Don't select here - selection is handled in onMouseDown
+    };
+
+    const handleDragEnd = (e) => {
+        setIsDragging(false);
+        setDragStartedWithMiddleClick(false);
+        
+        onBackgroundChange({
+            ...backgroundAttrs,
+            x: e.target.x(),
+            y: e.target.y(),
+        });
+    };
 
     useEffect(() => {
         if (isSelected && trRef.current && imageNodeRef.current) {
@@ -53,15 +116,11 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
                 image={image}
                 ref={imageNodeRef}
                 draggable={!isPanning}
-                onClick={onSelect}
-                onTap={onSelect}
-                onDragEnd={(e) => {
-                    onBackgroundChange({
-                        ...backgroundAttrs,
-                        x: e.target.x(),
-                        y: e.target.y(),
-                    });
-                }}
+                onClick={handleClick}
+                onTap={handleClick}
+                onMouseDown={handleMouseDown}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
                 onTransformEnd={(e) => {
                     const node = imageNodeRef.current;
                     const scaleX = node.scaleX();
