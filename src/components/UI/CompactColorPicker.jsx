@@ -78,22 +78,42 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     };
   };
   
-  // Convert RGB to Hex
-  const rgbToHex = (r, g, b) => {
-    return '#' + [r, g, b].map(x => {
+  // Convert RGB to Hex with Alpha
+  const rgbToHex = (r, g, b, a = 1) => {
+    const toHex = (x) => {
       const hex = x.toString(16);
       return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
+    };
+    
+    const alpha = Math.round(a * 255);
+    return '#' + toHex(r) + toHex(g) + toHex(b) + toHex(alpha);
   };
   
-  // Convert Hex to RGB
+  // Convert Hex to RGB (with optional alpha)
   const hexToRgb = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    // Handle 8-character hex with alpha (#RRGGBBAA)
+    const result8 = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (result8) {
+      return {
+        r: parseInt(result8[1], 16),
+        g: parseInt(result8[2], 16),
+        b: parseInt(result8[3], 16),
+        a: parseInt(result8[4], 16) / 255
+      };
+    }
+    
+    // Handle 6-character hex without alpha (#RRGGBB)
+    const result6 = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (result6) {
+      return {
+        r: parseInt(result6[1], 16),
+        g: parseInt(result6[2], 16),
+        b: parseInt(result6[3], 16),
+        a: 1
+      };
+    }
+    
+    return null;
   };
   
   // Initialize color from props
@@ -101,10 +121,10 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     if (color.startsWith('#')) {
       const rgbValue = hexToRgb(color);
       if (rgbValue) {
-        setRgb({ ...rgbValue, a: 1 });
+        setRgb({ ...rgbValue }); // Use the alpha from hexToRgb
         setHex(color);
         const hslValue = rgbToHsl(rgbValue.r, rgbValue.g, rgbValue.b);
-        setHsl({ ...hslValue, a: 1 });
+        setHsl({ ...hslValue, a: rgbValue.a }); // Use the alpha from hexToRgb
       }
     } else if (color.startsWith('rgba')) {
       // Handle rgba format
@@ -116,7 +136,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
         const a = match[4] ? parseFloat(match[4]) : 1;
         
         setRgb({ r, g, b, a });
-        setHex(rgbToHex(r, g, b));
+        setHex(rgbToHex(r, g, b, a));
         const hslValue = rgbToHsl(r, g, b);
         setHsl({ ...hslValue, a });
       }
@@ -337,16 +357,24 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     const newRgbWithAlpha = { ...newRgb, a: rgb.a };
     
     setRgb(newRgbWithAlpha);
-    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b));
+    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a));
     setHsl({ h: Math.round(hue), s: 100, l: Math.round(lightness), a: rgb.a });
     
     // Call onChange immediately for live preview on canvas element
     if (onChange) {
-      onChange({
-        hex: rgbToHex(newRgb.r, newRgb.g, newRgb.b),
+      const colorData = {
+        hex: rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a),
         rgba: newRgbWithAlpha,
         hsla: { h: Math.round(hue), s: 100, l: Math.round(lightness), a: rgb.a }
-      });
+      };
+      
+      // Handle alpha 0 case - use 'transparent' string
+      if (rgb.a === 0) {
+        colorData.hex = 'transparent';
+        colorData.rgba = { r: newRgb.r, g: newRgb.g, b: newRgb.b, a: 0 };
+      }
+      
+      onChange(colorData);
     }
   };
   
@@ -356,15 +384,23 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     
     const hslValue = rgbToHsl(newRgb.r, newRgb.g, newRgb.b);
     setHsl({ ...hslValue, a: newRgb.a });
-    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b));
+    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a));
     
     // Call onChange immediately for live preview
     if (onChange) {
-      onChange({
-        hex: rgbToHex(newRgb.r, newRgb.g, newRgb.b),
+      const colorData = {
+        hex: rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a),
         rgba: newRgb,
         hsla: { ...hslValue, a: newRgb.a }
-      });
+      };
+      
+      // Handle alpha 0 case - use 'transparent' string
+      if (newRgb.a === 0) {
+        colorData.hex = 'transparent';
+        colorData.rgba = { ...newRgb, a: 0 };
+      }
+      
+      onChange(colorData);
     }
   };
   
@@ -374,15 +410,23 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     
     const rgbValue = hslToRgb(newHsl.h, newHsl.s, newHsl.l);
     setRgb({ ...rgbValue, a: newHsl.a });
-    setHex(rgbToHex(rgbValue.r, rgbValue.g, rgbValue.b));
+    setHex(rgbToHex(rgbValue.r, rgbValue.g, rgbValue.b, newHsl.a));
     
     // Call onChange immediately for live preview
     if (onChange) {
-      onChange({
-        hex: rgbToHex(rgbValue.r, rgbValue.g, rgbValue.b),
+      const colorData = {
+        hex: rgbToHex(rgbValue.r, rgbValue.g, rgbValue.b, newHsl.a),
         rgba: { ...rgbValue, a: newHsl.a },
         hsla: newHsl
-      });
+      };
+      
+      // Handle alpha 0 case - use 'transparent' string
+      if (newHsl.a === 0) {
+        colorData.hex = 'transparent';
+        colorData.rgba = { ...rgbValue, a: 0 };
+      }
+      
+      onChange(colorData);
     }
   };
   
@@ -397,11 +441,19 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
       
       // Call onChange immediately for live preview
       if (onChange) {
-        onChange({
+        const colorData = {
           hex: value,
           rgba: newRgb,
           hsla: { ...hslValue, a: rgb.a }
-        });
+        };
+        
+        // Handle alpha 0 case - use 'transparent' string
+        if (rgb.a === 0) {
+          colorData.hex = 'transparent';
+          colorData.rgba = { ...newRgb, a: 0 };
+        }
+        
+        onChange(colorData);
       }
     }
   };
@@ -429,11 +481,11 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
           top: `${pickerPosition.top}px`,
           left: `${pickerPosition.left}px`,
           zIndex: 1000,
-          backgroundColor: '#fff',
-          border: '2px solid #ccc',
+          backgroundColor: '#2c2c2c',
+          border: '2px solid #444',
           borderRadius: '12px',
           padding: '20px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
           width: '400px',
           maxHeight: '80vh',
           overflowY: 'auto'
@@ -463,9 +515,9 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                   flex: 1,
                   padding: '8px 16px',
                   fontSize: '14px',
-                  border: activeTab === 'rgb' ? '2px solid #007acc' : '2px solid #ccc',
-                  backgroundColor: activeTab === 'rgb' ? '#007acc' : '#f5f5f5',
-                  color: activeTab === 'rgb' ? '#fff' : '#333',
+                  border: activeTab === 'rgb' ? '2px solid #007acc' : '2px solid #555',
+                  backgroundColor: activeTab === 'rgb' ? '#007acc' : '#3a3a3a',
+                  color: activeTab === 'rgb' ? '#fff' : '#fff',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontWeight: activeTab === 'rgb' ? 'bold' : 'normal'
@@ -510,7 +562,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
             {activeTab === 'rgb' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold' }}>R:</span>
+                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>R:</span>
                   <input
                     type="range"
                     min="0"
@@ -525,11 +577,11 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     max="255"
                     value={rgb.r}
                     onChange={(e) => handleRgbChange('r', parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold' }}>G:</span>
+                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>G:</span>
                   <input
                     type="range"
                     min="0"
@@ -544,11 +596,11 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     max="255"
                     value={rgb.g}
                     onChange={(e) => handleRgbChange('g', parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold' }}>B:</span>
+                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>B:</span>
                   <input
                     type="range"
                     min="0"
@@ -563,7 +615,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     max="255"
                     value={rgb.b}
                     onChange={(e) => handleRgbChange('b', parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -584,7 +636,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     step="0.01"
                     value={rgb.a}
                     onChange={(e) => handleRgbChange('a', parseFloat(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
               </div>
@@ -593,7 +645,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
             {activeTab === 'hsl' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold' }}>H:</span>
+                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>H:</span>
                   <input
                     type="range"
                     min="0"
@@ -608,11 +660,11 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     max="360"
                     value={hsl.h}
                     onChange={(e) => handleHslChange('h', parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold' }}>S:</span>
+                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>S:</span>
                   <input
                     type="range"
                     min="0"
@@ -627,11 +679,11 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     max="100"
                     value={hsl.s}
                     onChange={(e) => handleHslChange('s', parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold' }}>L:</span>
+                  <span style={{ width: '20px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>L:</span>
                   <input
                     type="range"
                     min="0"
@@ -646,7 +698,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     max="100"
                     value={hsl.l}
                     onChange={(e) => handleHslChange('l', parseInt(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -667,7 +719,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     step="0.01"
                     value={hsl.a}
                     onChange={(e) => handleHslChange('a', parseFloat(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
               </div>
@@ -676,24 +728,43 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
             {activeTab === 'hex' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '40px', fontSize: '14px', fontWeight: 'bold' }}>HEX:</span>
+                  <span style={{ width: '40px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>HEX:</span>
                   <input
                     type="text"
                     value={hex}
                     onChange={(e) => handleHexChange(e.target.value)}
-                    placeholder="#000000"
+                    placeholder="#RRGGBBAA"
                     style={{ 
                       flex: 1, 
                       padding: '6px 12px', 
-                      border: '2px solid #ccc', 
+                      border: '2px solid #555', 
                       borderRadius: '6px',
                       fontFamily: 'monospace',
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: '#3a3a3a',
+                      color: '#fff'
                     }}
                   />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(hex);
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      border: '2px solid #555',
+                      borderRadius: '6px',
+                      backgroundColor: '#3a3a3a',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                    title="Copy HEX"
+                  >
+                    📋
+                  </button>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '40px', fontSize: '14px', fontWeight: 'bold' }}>A:</span>
+                  <span style={{ width: '40px', fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>A:</span>
                   <input
                     type="range"
                     min="0"
@@ -710,7 +781,7 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                     step="0.01"
                     value={rgb.a}
                     onChange={(e) => handleRgbChange('a', parseFloat(e.target.value) || 0)}
-                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #ccc', borderRadius: '6px', fontSize: '14px' }}
+                    style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
               </div>
@@ -722,21 +793,21 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
             alignItems: 'center', 
             gap: '16px',
             padding: '12px',
-            backgroundColor: '#f8f9fa',
+            backgroundColor: '#3a3a3a',
             borderRadius: '8px',
             marginBottom: '20px'
           }}>
-            <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Preview:</div>
+            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>Preview:</div>
             <div 
               style={{ 
                 width: '60px', 
                 height: '40px', 
-                border: '2px solid #ccc',
+                border: '2px solid #555',
                 borderRadius: '6px',
                 backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${rgb.a})`
               }}
             />
-            <div style={{ fontSize: '12px', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#ccc' }}>
               {hex}
             </div>
           </div>

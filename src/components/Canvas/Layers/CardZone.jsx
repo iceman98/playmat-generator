@@ -31,7 +31,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
         }
     }, [isSelected]);
 
-    const zoneOpacity = shapeProps.opacity !== undefined ? shapeProps.opacity : 1;
+    const imageOpacity = shapeProps.imageOpacity !== undefined ? shapeProps.imageOpacity : 1;
 
     return (
         <React.Fragment>
@@ -70,14 +70,14 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                             hasBottom && hasLeft ? r : 0    // bottom-left
                         ];
                     })()}
-                    opacity={zoneOpacity}
+                    opacity={1} // Fill uses its own alpha from fill color
                     ref={shapeRef}
                     shadowEnabled={shapeProps.borderShadow || false}
                     shadowOffsetX={shapeProps.borderShadowX || 3}
                     shadowOffsetY={shapeProps.borderShadowY || 3}
                     shadowBlur={shapeProps.borderShadowBlur || 5}
                     shadowColor={shapeProps.borderShadowColor || '#000000'}
-                    shadowOpacity={zoneOpacity}
+                    shadowOpacity={1} // Shadow uses its own alpha from shadowColor
                     onTransformEnd={(e) => {
                         const node = shapeRef.current;
                         const scaleX = node.scaleX();
@@ -108,7 +108,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {shapeProps.borderRight !== false && (
@@ -124,7 +124,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {shapeProps.borderBottom !== false && (
@@ -140,7 +140,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {shapeProps.borderLeft !== false && (
@@ -156,7 +156,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
 
@@ -168,7 +168,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {/* Top-Right Corner */}
@@ -178,7 +178,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {/* Bottom-Right Corner */}
@@ -188,7 +188,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {/* Bottom-Left Corner */}
@@ -198,7 +198,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                        opacity={zoneOpacity}
+                                            opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {zoneImage && (
@@ -221,7 +221,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                             ];
                         })()}
                         listening={false}
-                        opacity={zoneOpacity}
+                        opacity={imageOpacity} // Image uses its own opacity control
                     />
                 )}
                 <Text
@@ -233,7 +233,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     align="center"
                     width={shapeProps.width}
                     listening={false}
-                    opacity={zoneOpacity}
+                    opacity={1} // Text uses its own alpha from textColor
                     stroke={shapeProps.textStroke > 0 ? (shapeProps.textStrokeColor || '#000000') : undefined}
                     strokeWidth={shapeProps.textStroke || 0}
                     shadowEnabled={shapeProps.textShadow || false}
@@ -241,7 +241,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     shadowOffsetY={shapeProps.textShadowY || 2}
                     shadowBlur={shapeProps.textShadowBlur || 3}
                     shadowColor={shapeProps.textShadowColor || '#000000'}
-                    shadowOpacity={zoneOpacity}
+                    shadowOpacity={1} // Shadow uses its own alpha from shadowColor
                     {...(() => {
                         const padding = 5;
                         const textHeight = shapeProps.fontSize || 14;

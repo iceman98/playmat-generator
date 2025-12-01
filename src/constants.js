@@ -44,30 +44,30 @@ export const DEFAULT_ZONE_SIZE_CM = {
 
 export const DEFAULT_ZONE = {
     // width and height will be set dynamically based on unit
-    fill: 'rgba(255, 255, 255, 0.3)',
-    stroke: '#ffffff',
+    fill: '#ffffff4d', // rgba(255, 255, 255, 0.3) as hex with alpha
+    stroke: '#ffffff80', // rgba(255, 255, 255, 1) as hex with alpha
     strokeWidth: 3,
     cornerRadius: 18,
-    opacity: 0.5,
+    imageOpacity: 0.5, // Renamed from opacity to clarify it only affects images
     text: 'Card Zone',
     fontSize: 28,
     fontFamily: 'Arial',
     fontStyle: 'bold',
-    textColor: 'white',
+    textColor: '#ffffff80', // white with full alpha as hex
     textPosition: 'bottom-out', // 'top', 'bottom', 'center', 'top-out', 'bottom-out'
     noFill: false,
     textStroke: 0,
-    textStrokeColor: '#000000',
+    textStrokeColor: '#000000ff', // black with full alpha as hex
     textShadow: false,
     textShadowX: 2,
     textShadowY: 2,
     textShadowBlur: 3,
-    textShadowColor: '#000000',
+    textShadowColor: '#000000ff', // black with full alpha as hex
     borderShadow: false,
     borderShadowX: 3,
     borderShadowY: 3,
     borderShadowBlur: 5,
-    borderShadowColor: '#000000',
+    borderShadowColor: '#000000ff', // black with full alpha as hex
     // Border toggles - control which borders are drawn
     borderTop: true,
     borderRight: true,
