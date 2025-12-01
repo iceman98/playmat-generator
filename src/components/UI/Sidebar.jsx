@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Image as ImageIcon, Type, Square, Download, Settings } from 'lucide-react';
+import { Search, Image as ImageIcon, Square, Download, Settings } from 'lucide-react';
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
@@ -43,13 +43,7 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                 >
                     <Square size={20} />
                 </button>
-                <button
-                    className={`${styles.tab} ${activeTab === 'text' ? styles.active : ''}`}
-                    onClick={() => setActiveTab('text')}
-                    title="Text"
-                >
-                    <Type size={20} />
-                </button>
+
                 <button
                     className={`${styles.tab} ${activeTab === 'settings' ? styles.active : ''}`}
                     onClick={() => setActiveTab('settings')}
@@ -150,12 +144,7 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                     </div>
                 )}
 
-                {activeTab === 'text' && (
-                    <div className={styles.panel}>
-                        <h3>Text</h3>
-                        <p className={styles.hint}>Text tools coming soon.</p>
-                    </div>
-                )}
+
 
                 {activeTab === 'settings' && (
                     <div className={styles.panel}>
