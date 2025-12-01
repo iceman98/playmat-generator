@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Type, Box, Palette, Move, RotateCw, Maximize, Image as ImageIcon } from 'lucide-react';
+import CompactColorPicker from './CompactColorPicker';
 import styles from './PropertiesPanel.module.css';
 
 const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
@@ -18,10 +19,15 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
     };
 
     const handleChange = (key, value) => {
-        if (isBackground) {
-            onUpdateBackground({ ...backgroundAttrs, [key]: value });
-        } else {
-            onUpdateZone({ ...selectedZone, [key]: value });
+        try {
+            console.log('handleChange called:', { key, value, selectedZone, isBackground });
+            if (isBackground) {
+                onUpdateBackground({ ...backgroundAttrs, [key]: value });
+            } else {
+                onUpdateZone({ ...selectedZone, [key]: value });
+            }
+        } catch (error) {
+            console.error('Error in handleChange:', error, { key, value, selectedZone });
         }
     };
 
@@ -199,6 +205,12 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
         );
     }
 
+    // Additional safety check
+    if (!selectedZone) {
+        console.error('selectedZone is null or undefined');
+        return null;
+    }
+
     return (
         <div className={styles.panel}>
             <div className={styles.header}>
@@ -262,13 +274,25 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             onChange={(e) => handleChange('fontSize', Number(e.target.value))}
                         />
                     </div>
-                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                    <div className={styles.controlGroup}>
                         <label>Color</label>
-                        <input
-                            type="color"
-                            className={styles.colorPicker}
-                            value={selectedZone.textColor || '#ffffff'}
-                            onChange={(e) => handleChange('textColor', e.target.value)}
+                        <CompactColorPicker
+                            color={selectedZone.textColor || '#ffffff'}
+                            onChange={(colorData) => {
+                                try {
+                                    console.log('Color picker onChange:', colorData);
+                                    // Safety check for colorData structure
+                                    if (!colorData || !colorData.rgba) {
+                                        console.error('Invalid colorData:', colorData);
+                                        return;
+                                    }
+                                    // Use the rgba value with alpha from the picker
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 255}, ${colorData.rgba.g || 255}, ${colorData.rgba.b || 255}, ${colorData.rgba.a || 1})`;
+                                    handleChange('textColor', colorWithAlpha);
+                                } catch (error) {
+                                    console.error('Error in textColor picker:', error, colorData);
+                                }
+                            }}
                         />
                     </div>
                 </div>
@@ -332,11 +356,21 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                 {selectedZone.textStroke > 0 && (
                     <div className={styles.controlGroup}>
                         <label>Outline Color</label>
-                        <input
-                            type="color"
-                            className={styles.colorPicker}
-                            value={selectedZone.textStrokeColor || '#000000'}
-                            onChange={(e) => handleChange('textStrokeColor', e.target.value)}
+                        <CompactColorPicker
+                            color={selectedZone.textStrokeColor || '#000000'}
+                            onChange={(colorData) => {
+                                try {
+                                    console.log('TextStrokeColor picker onChange:', colorData);
+                                    if (!colorData || !colorData.rgba) {
+                                        console.error('Invalid colorData:', colorData);
+                                        return;
+                                    }
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 0}, ${colorData.rgba.g || 0}, ${colorData.rgba.b || 0}, ${colorData.rgba.a || 1})`;
+                                    handleChange('textStrokeColor', colorWithAlpha);
+                                } catch (error) {
+                                    console.error('Error in textStrokeColor picker:', error, colorData);
+                                }
+                            }}
                         />
                     </div>
                 )}
@@ -387,11 +421,12 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             </div>
                             <div className={`${styles.controlGroup} ${styles.col}`}>
                                 <label>Shadow Color</label>
-                                <input
-                                    type="color"
-                                    className={styles.colorPicker}
-                                    value={selectedZone.textShadowColor || '#000000'}
-                                    onChange={(e) => handleChange('textShadowColor', e.target.value)}
+                                <CompactColorPicker
+                                    color={selectedZone.textShadowColor || '#000000'}
+                                    onChange={(colorData) => {
+                                        const colorWithAlpha = `rgba(${colorData.rgba.r}, ${colorData.rgba.g}, ${colorData.rgba.b}, ${colorData.rgba.a})`;
+                                        handleChange('textShadowColor', colorWithAlpha);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -433,13 +468,27 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                 </div>
 
                 {selectedZone.zoneImage && (
-                    <button
-                        className={styles.actionButton}
-                        onClick={() => handleChange('zoneImage', null)}
-                        style={{ marginTop: '8px', width: '100%' }}
-                    >
-                        Remove Image
-                    </button>
+                    <>
+                        <div className={styles.controlGroup}>
+                            <label>Image Opacity: {selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1}</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                className={styles.slider}
+                                value={selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1}
+                                onChange={(e) => handleChange('imageOpacity', Number(e.target.value))}
+                            />
+                        </div>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => handleChange('zoneImage', null)}
+                            style={{ marginTop: '8px', width: '100%' }}
+                        >
+                            Remove Image
+                        </button>
+                    </>
                 )}
             </div>
 
@@ -449,20 +498,40 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                 <div className={styles.row}>
                     <div className={`${styles.controlGroup} ${styles.col}`}>
                         <label>Border Color</label>
-                        <input
-                            type="color"
-                            className={styles.colorPicker}
-                            value={selectedZone.stroke || '#000000'}
-                            onChange={(e) => handleChange('stroke', e.target.value)}
+                        <CompactColorPicker
+                            color={selectedZone.stroke || '#000000'}
+                            onChange={(colorData) => {
+                                try {
+                                    console.log('Stroke picker onChange:', colorData);
+                                    if (!colorData || !colorData.rgba) {
+                                        console.error('Invalid colorData:', colorData);
+                                        return;
+                                    }
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 0}, ${colorData.rgba.g || 0}, ${colorData.rgba.b || 0}, ${colorData.rgba.a || 1})`;
+                                    handleChange('stroke', colorWithAlpha);
+                                } catch (error) {
+                                    console.error('Error in stroke picker:', error, colorData);
+                                }
+                            }}
                         />
                     </div>
                     <div className={`${styles.controlGroup} ${styles.col}`}>
                         <label>Fill Color</label>
-                        <input
-                            type="color"
-                            className={styles.colorPicker}
-                            value={selectedZone.fill || 'rgba(255,255,255,0.3)'}
-                            onChange={(e) => handleChange('fill', e.target.value)}
+                        <CompactColorPicker
+                            color={selectedZone.fill || 'rgba(255,255,255,0.3)'}
+                            onChange={(colorData) => {
+                                try {
+                                    console.log('Fill picker onChange:', colorData);
+                                    if (!colorData || !colorData.rgba) {
+                                        console.error('Invalid colorData:', colorData);
+                                        return;
+                                    }
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 255}, ${colorData.rgba.g || 255}, ${colorData.rgba.b || 255}, ${colorData.rgba.a || 0.3})`;
+                                    handleChange('fill', colorWithAlpha);
+                                } catch (error) {
+                                    console.error('Error in fill picker:', error, colorData);
+                                }
+                            }}
                             disabled={selectedZone.noFill}
                         />
                     </div>
@@ -580,11 +649,12 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             </div>
                             <div className={`${styles.controlGroup} ${styles.col}`}>
                                 <label>Shadow Color</label>
-                                <input
-                                    type="color"
-                                    className={styles.colorPicker}
-                                    value={selectedZone.borderShadowColor || '#000000'}
-                                    onChange={(e) => handleChange('borderShadowColor', e.target.value)}
+                                <CompactColorPicker
+                                    color={selectedZone.borderShadowColor || '#000000'}
+                                    onChange={(colorData) => {
+                                        const colorWithAlpha = `rgba(${colorData.rgba.r}, ${colorData.rgba.g}, ${colorData.rgba.b}, ${colorData.rgba.a})`;
+                                        handleChange('borderShadowColor', colorWithAlpha);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -603,19 +673,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                     />
                 </div>
 
-                <div className={styles.controlGroup}>
-                    <label>Opacity: {selectedZone.opacity || 1}</label>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        className={styles.slider}
-                        value={selectedZone.opacity !== undefined ? selectedZone.opacity : 1}
-                        onChange={(e) => handleChange('opacity', Number(e.target.value))}
-                    />
                 </div>
-            </div>
 
             <div className={styles.section} style={{ borderBottom: 'none' }}>
                 <button
