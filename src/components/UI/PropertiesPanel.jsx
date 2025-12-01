@@ -481,6 +481,48 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                 </div>
 
                 <div className={styles.controlGroup}>
+                    <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>Visible Borders</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <label style={{ fontSize: '13px' }}>
+                            <input
+                                type="checkbox"
+                                checked={selectedZone.borderTop !== false}
+                                onChange={(e) => handleChange('borderTop', e.target.checked)}
+                                style={{ marginRight: '6px' }}
+                            />
+                            Top
+                        </label>
+                        <label style={{ fontSize: '13px' }}>
+                            <input
+                                type="checkbox"
+                                checked={selectedZone.borderRight !== false}
+                                onChange={(e) => handleChange('borderRight', e.target.checked)}
+                                style={{ marginRight: '6px' }}
+                            />
+                            Right
+                        </label>
+                        <label style={{ fontSize: '13px' }}>
+                            <input
+                                type="checkbox"
+                                checked={selectedZone.borderBottom !== false}
+                                onChange={(e) => handleChange('borderBottom', e.target.checked)}
+                                style={{ marginRight: '6px' }}
+                            />
+                            Bottom
+                        </label>
+                        <label style={{ fontSize: '13px' }}>
+                            <input
+                                type="checkbox"
+                                checked={selectedZone.borderLeft !== false}
+                                onChange={(e) => handleChange('borderLeft', e.target.checked)}
+                                style={{ marginRight: '6px' }}
+                            />
+                            Left
+                        </label>
+                    </div>
+                </div>
+
+                <div className={styles.controlGroup}>
                     <label>Border Thickness: {selectedZone.strokeWidth || 2}px</label>
                     <input
                         type="range"

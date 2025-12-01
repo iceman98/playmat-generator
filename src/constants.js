@@ -68,6 +68,11 @@ export const DEFAULT_ZONE = {
     borderShadowY: 3,
     borderShadowBlur: 5,
     borderShadowColor: '#000000',
+    // Border toggles - control which borders are drawn
+    borderTop: true,
+    borderRight: true,
+    borderBottom: true,
+    borderLeft: true,
 };
 
 // ----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Rect, Transformer, Group, Text, Image } from 'react-konva';
+import { Rect, Transformer, Group, Text, Image, Line, Path } from 'react-konva';
 import useImage from 'use-image';
 import {
     DEFAULT_GRID_ENABLED,
@@ -49,13 +49,27 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     });
                 }}
             >
+                {/* Background rectangle with selective corner radius */}
                 <Rect
                     width={shapeProps.width}
                     height={shapeProps.height}
                     fill={shapeProps.noFill ? 'transparent' : (shapeProps.fill || 'rgba(255, 255, 255, 0.3)')}
-                    stroke={shapeProps.stroke || '#000000'}
-                    strokeWidth={shapeProps.strokeWidth || 2}
-                    cornerRadius={shapeProps.cornerRadius || 0}
+                    stroke="transparent"
+                    cornerRadius={(() => {
+                        const r = shapeProps.cornerRadius || 0;
+                        const hasTop = shapeProps.borderTop !== false;
+                        const hasRight = shapeProps.borderRight !== false;
+                        const hasBottom = shapeProps.borderBottom !== false;
+                        const hasLeft = shapeProps.borderLeft !== false;
+
+                        // Return array [topLeft, topRight, bottomRight, bottomLeft]
+                        return [
+                            hasTop && hasLeft ? r : 0,      // top-left
+                            hasTop && hasRight ? r : 0,     // top-right
+                            hasBottom && hasRight ? r : 0,  // bottom-right
+                            hasBottom && hasLeft ? r : 0    // bottom-left
+                        ];
+                    })()}
                     opacity={zoneOpacity}
                     ref={shapeRef}
                     shadowEnabled={shapeProps.borderShadow || false}
@@ -80,12 +94,132 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         });
                     }}
                 />
+                {/* Individual border lines for selective rendering with corner radius */}
+                {shapeProps.borderTop !== false && (
+                    <Line
+                        points={(() => {
+                            const r = shapeProps.cornerRadius || 0;
+                            const hasLeft = shapeProps.borderLeft !== false;
+                            const hasRight = shapeProps.borderRight !== false;
+                            const startX = hasLeft ? r : 0;
+                            const endX = hasRight ? shapeProps.width - r : shapeProps.width;
+                            return [startX, 0, endX, 0];
+                        })()}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+                {shapeProps.borderRight !== false && (
+                    <Line
+                        points={(() => {
+                            const r = shapeProps.cornerRadius || 0;
+                            const hasTop = shapeProps.borderTop !== false;
+                            const hasBottom = shapeProps.borderBottom !== false;
+                            const startY = hasTop ? r : 0;
+                            const endY = hasBottom ? shapeProps.height - r : shapeProps.height;
+                            return [shapeProps.width, startY, shapeProps.width, endY];
+                        })()}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+                {shapeProps.borderBottom !== false && (
+                    <Line
+                        points={(() => {
+                            const r = shapeProps.cornerRadius || 0;
+                            const hasRight = shapeProps.borderRight !== false;
+                            const hasLeft = shapeProps.borderLeft !== false;
+                            const startX = hasRight ? shapeProps.width - r : shapeProps.width;
+                            const endX = hasLeft ? r : 0;
+                            return [startX, shapeProps.height, endX, shapeProps.height];
+                        })()}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+                {shapeProps.borderLeft !== false && (
+                    <Line
+                        points={(() => {
+                            const r = shapeProps.cornerRadius || 0;
+                            const hasBottom = shapeProps.borderBottom !== false;
+                            const hasTop = shapeProps.borderTop !== false;
+                            const startY = hasBottom ? shapeProps.height - r : shapeProps.height;
+                            const endY = hasTop ? r : 0;
+                            return [0, startY, 0, endY];
+                        })()}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+
+                {/* Corner Arcs */}
+                {/* Top-Left Corner */}
+                {shapeProps.borderTop !== false && shapeProps.borderLeft !== false && (shapeProps.cornerRadius || 0) > 0 && (
+                    <Path
+                        data={`M 0 ${shapeProps.cornerRadius} A ${shapeProps.cornerRadius} ${shapeProps.cornerRadius} 0 0 1 ${shapeProps.cornerRadius} 0`}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+                {/* Top-Right Corner */}
+                {shapeProps.borderTop !== false && shapeProps.borderRight !== false && (shapeProps.cornerRadius || 0) > 0 && (
+                    <Path
+                        data={`M ${shapeProps.width - shapeProps.cornerRadius} 0 A ${shapeProps.cornerRadius} ${shapeProps.cornerRadius} 0 0 1 ${shapeProps.width} ${shapeProps.cornerRadius}`}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+                {/* Bottom-Right Corner */}
+                {shapeProps.borderBottom !== false && shapeProps.borderRight !== false && (shapeProps.cornerRadius || 0) > 0 && (
+                    <Path
+                        data={`M ${shapeProps.width} ${shapeProps.height - shapeProps.cornerRadius} A ${shapeProps.cornerRadius} ${shapeProps.cornerRadius} 0 0 1 ${shapeProps.width - shapeProps.cornerRadius} ${shapeProps.height}`}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
+                {/* Bottom-Left Corner */}
+                {shapeProps.borderBottom !== false && shapeProps.borderLeft !== false && (shapeProps.cornerRadius || 0) > 0 && (
+                    <Path
+                        data={`M ${shapeProps.cornerRadius} ${shapeProps.height} A ${shapeProps.cornerRadius} ${shapeProps.cornerRadius} 0 0 1 0 ${shapeProps.height - shapeProps.cornerRadius}`}
+                        stroke={shapeProps.stroke || '#000000'}
+                        strokeWidth={shapeProps.strokeWidth || 2}
+                        listening={false}
+                        opacity={zoneOpacity}
+                    />
+                )}
                 {zoneImage && (
                     <Image
                         image={zoneImage}
                         width={shapeProps.width}
                         height={shapeProps.height}
-                        cornerRadius={shapeProps.cornerRadius || 0}
+                        cornerRadius={(() => {
+                            const r = shapeProps.cornerRadius || 0;
+                            const hasTop = shapeProps.borderTop !== false;
+                            const hasRight = shapeProps.borderRight !== false;
+                            const hasBottom = shapeProps.borderBottom !== false;
+                            const hasLeft = shapeProps.borderLeft !== false;
+
+                            return [
+                                hasTop && hasLeft ? r : 0,
+                                hasTop && hasRight ? r : 0,
+                                hasBottom && hasRight ? r : 0,
+                                hasBottom && hasLeft ? r : 0
+                            ];
+                        })()}
                         listening={false}
                         opacity={zoneOpacity}
                     />
