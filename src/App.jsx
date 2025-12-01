@@ -14,6 +14,54 @@ import {
 } from './constants';
 import './index.css';
 
+// LocalStorage keys
+const LS_KEYS = {
+  PROJECT: 'playmat-generator-project',
+  VERSION: 'playmat-generator-version'
+};
+
+// Save project to localStorage
+const saveProjectToLocalStorage = (projectData) => {
+  try {
+    const dataString = JSON.stringify(projectData);
+    console.log('Stringified project data size:', dataString.length, 'characters');
+    
+    localStorage.setItem(LS_KEYS.PROJECT, dataString);
+    localStorage.setItem(LS_KEYS.VERSION, '1.0');
+    
+    console.log('Project saved successfully to localStorage');
+  } catch (error) {
+    console.error('Failed to save project to localStorage:', error);
+  }
+};
+
+// Load project from localStorage
+const loadProjectFromLocalStorage = () => {
+  try {
+    const savedProject = localStorage.getItem(LS_KEYS.PROJECT);
+    console.log('Raw data from localStorage:', savedProject ? 'Found' : 'Not found');
+    
+    if (savedProject) {
+      const parsed = JSON.parse(savedProject);
+      console.log('Parsed project data:', parsed);
+      return parsed;
+    }
+  } catch (error) {
+    console.error('Failed to load project from localStorage:', error);
+  }
+  return null;
+};
+
+// Clear project from localStorage
+const clearProjectFromLocalStorage = () => {
+  try {
+    localStorage.removeItem(LS_KEYS.PROJECT);
+    localStorage.removeItem(LS_KEYS.VERSION);
+  } catch (error) {
+    console.error('Failed to clear project from localStorage:', error);
+  }
+};
+
 function App() {
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [backgroundAttrs, setBackgroundAttrs] = useState(null);
@@ -25,7 +73,113 @@ function App() {
   const [gridEnabled, setGridEnabled] = useState(DEFAULT_GRID_ENABLED);
   const [gridSize, setGridSize] = useState(DEFAULT_GRID_SIZE);
   const [copiedZone, setCopiedZone] = useState(null);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const stageRef = useRef(null);
+
+  // Load project from localStorage on mount
+  useEffect(() => {
+    const savedProject = loadProjectFromLocalStorage();
+    console.log('Loading project from localStorage:', savedProject);
+    
+    if (savedProject) {
+      // Restore all project state
+      if (savedProject.backgroundImage) {
+        console.log('Restoring backgroundImage:', savedProject.backgroundImage);
+        setBackgroundImage(savedProject.backgroundImage);
+      }
+      if (savedProject.backgroundAttrs) {
+        console.log('Restoring backgroundAttrs:', savedProject.backgroundAttrs);
+        setBackgroundAttrs(savedProject.backgroundAttrs);
+      }
+      if (savedProject.zones) {
+        console.log('Restoring zones:', savedProject.zones);
+        setZones(savedProject.zones);
+      }
+      if (savedProject.selectedId) {
+        console.log('Restoring selectedId:', savedProject.selectedId);
+        selectShape(savedProject.selectedId);
+      }
+      if (savedProject.matSize) {
+        console.log('Restoring matSize:', savedProject.matSize);
+        setMatSize(savedProject.matSize);
+      }
+      if (savedProject.unit) {
+        console.log('Restoring unit:', savedProject.unit);
+        setUnit(savedProject.unit);
+      }
+      if (savedProject.dpi) {
+        console.log('Restoring dpi:', savedProject.dpi);
+        setDpi(savedProject.dpi);
+      }
+      if (savedProject.gridEnabled !== undefined) {
+        console.log('Restoring gridEnabled:', savedProject.gridEnabled);
+        setGridEnabled(savedProject.gridEnabled);
+      }
+      if (savedProject.gridSize) {
+        console.log('Restoring gridSize:', savedProject.gridSize);
+        setGridSize(savedProject.gridSize);
+      }
+      console.log('Project loaded successfully from localStorage');
+    } else {
+      console.log('No saved project found in localStorage');
+    }
+    
+    // Set loading to false after loading is complete
+    setIsLoading(false);
+  }, []);
+
+  // Auto-save project to localStorage when state changes (but not during initial load)
+  useEffect(() => {
+    // Don't auto-save during initial loading
+    if (isLoading) return;
+    
+    const projectData = {
+      backgroundImage,
+      backgroundAttrs,
+      zones,
+      selectedId,
+      matSize,
+      unit,
+      dpi,
+      gridEnabled,
+      gridSize,
+      timestamp: Date.now()
+    };
+    
+    console.log('Saving project to localStorage:', {
+      zonesCount: zones.length,
+      hasBackgroundImage: !!backgroundImage,
+      hasBackgroundAttrs: !!backgroundAttrs,
+      selectedId,
+      matSize,
+      unit,
+      dpi,
+      gridEnabled,
+      gridSize
+    });
+    
+    saveProjectToLocalStorage(projectData);
+    setLastSaved(Date.now());
+  }, [backgroundImage, backgroundAttrs, zones, selectedId, matSize, unit, dpi, gridEnabled, gridSize]);
+
+  // Create new project function
+  const handleNewProject = () => {
+    if (window.confirm('¿Crear un nuevo proyecto? El proyecto actual se perderá si no se ha guardado.')) {
+      clearProjectFromLocalStorage();
+      setBackgroundImage(null);
+      setBackgroundAttrs(null);
+      setZones([]);
+      selectShape(null);
+      setMatSize(DEFAULT_MAT_SIZE);
+      setUnit(DEFAULT_UNIT);
+      setDpi(DEFAULT_EXPORT_DPI);
+      setGridEnabled(DEFAULT_GRID_ENABLED);
+      setGridSize(DEFAULT_GRID_SIZE);
+      setCopiedZone(null);
+      setLastSaved(null);
+    }
+  };
 
   // Copy-paste keyboard shortcuts
   useEffect(() => {
@@ -137,6 +291,7 @@ function App() {
         onSetBackground={handleSetBackground}
         onAddZone={handleAddZone}
         onExport={handleExport}
+        onNewProject={handleNewProject}
         matSize={matSize}
         onSetMatSize={setMatSize}
         unit={unit}
@@ -150,6 +305,7 @@ function App() {
         zones={zones}
         selectedId={selectedId}
         onSelectZone={selectShape}
+        lastSaved={lastSaved}
       />
       <DesignStage
         ref={stageRef}

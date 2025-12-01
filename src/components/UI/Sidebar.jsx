@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Image as ImageIcon, Square, Download, Settings } from 'lucide-react';
+import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save } from 'lucide-react';
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone }) => {
+const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
 
@@ -18,6 +18,18 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(searchQuery)}`;
             onSetBackground(url);
         }
+    };
+
+    // Format last saved time
+    const formatLastSaved = (timestamp) => {
+        if (!timestamp) return null;
+        const now = Date.now();
+        const diff = now - timestamp;
+        
+        if (diff < 60000) return 'Guardado ahora';
+        if (diff < 3600000) return `Guardado hace ${Math.floor(diff / 60000)} min`;
+        if (diff < 86400000) return `Guardado hace ${Math.floor(diff / 3600000)} h`;
+        return `Guardado hace ${Math.floor(diff / 86400000)} d`;
     };
 
     const presetImages = [
@@ -51,6 +63,22 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, matSize, onSetMatSize, 
                 >
                     <Settings size={20} />
                 </button>
+            </div>
+
+            <div className={styles.header}>
+                <button 
+                    className={styles.actionButton}
+                    onClick={onNewProject}
+                    title="Nuevo Proyecto"
+                >
+                    <FilePlus size={16} />
+                    Nuevo
+                </button>
+                
+                <div className={styles.saveStatus}>
+                    <Save size={14} />
+                    {formatLastSaved(lastSaved) || 'Sin guardar'}
+                </div>
             </div>
 
             <div className={styles.content}>
