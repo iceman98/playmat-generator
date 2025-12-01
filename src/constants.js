@@ -57,17 +57,17 @@ export const DEFAULT_ZONE = {
     textPosition: 'bottom-out', // 'top', 'bottom', 'center', 'top-out', 'bottom-out'
     noFill: false,
     textStroke: 0,
-    textStrokeColor: '#000000ff', // black with full alpha as hex
+    textStrokeColor: '#00000080', // black with full alpha as hex
     textShadow: false,
     textShadowX: 2,
     textShadowY: 2,
     textShadowBlur: 3,
-    textShadowColor: '#000000ff', // black with full alpha as hex
+    textShadowColor: '#00000080', // black with full alpha as hex
     borderShadow: false,
     borderShadowX: 3,
     borderShadowY: 3,
     borderShadowBlur: 5,
-    borderShadowColor: '#000000ff', // black with full alpha as hex
+    borderShadowColor: '#00000080', // black with full alpha as hex
     // Border toggles - control which borders are drawn
     borderTop: true,
     borderRight: true,
