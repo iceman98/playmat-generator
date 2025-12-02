@@ -221,8 +221,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     />
                 )}
                 {zoneImage && (
-                    <Image
-                        image={zoneImage}
+                    <Group
                         x={(() => {
                             const strokeWidth = shapeProps.strokeWidth || 2;
                             return strokeWidth / 2;
@@ -231,35 +230,84 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                             const strokeWidth = shapeProps.strokeWidth || 2;
                             return strokeWidth / 2;
                         })()}
-                        width={(() => {
+                        clipFunc={(ctx) => {
                             const strokeWidth = shapeProps.strokeWidth || 2;
-                            return Math.max(0, shapeProps.width - strokeWidth);
-                        })()}
-                        height={(() => {
-                            const strokeWidth = shapeProps.strokeWidth || 2;
-                            return Math.max(0, shapeProps.height - strokeWidth);
-                        })()}
-                        cornerRadius={(() => {
+                            const width = Math.max(0, shapeProps.width - strokeWidth);
+                            const height = Math.max(0, shapeProps.height - strokeWidth);
                             const r = shapeProps.cornerRadius || 0;
-                            const strokeWidth = shapeProps.strokeWidth || 2;
+                            const adjustedRadius = Math.max(0, r - strokeWidth / 2);
+
                             const hasTop = shapeProps.borderTop !== false;
                             const hasRight = shapeProps.borderRight !== false;
                             const hasBottom = shapeProps.borderBottom !== false;
                             const hasLeft = shapeProps.borderLeft !== false;
 
-                            // Adjust corner radius to account for inset
-                            const adjustedRadius = Math.max(0, r - strokeWidth / 2);
+                            const tl = (hasTop && hasLeft) ? adjustedRadius : 0;
+                            const tr = (hasTop && hasRight) ? adjustedRadius : 0;
+                            const br = (hasBottom && hasRight) ? adjustedRadius : 0;
+                            const bl = (hasBottom && hasLeft) ? adjustedRadius : 0;
 
-                            return [
-                                hasTop && hasLeft ? adjustedRadius : 0,
-                                hasTop && hasRight ? adjustedRadius : 0,
-                                hasBottom && hasRight ? adjustedRadius : 0,
-                                hasBottom && hasLeft ? adjustedRadius : 0
-                            ];
-                        })()}
-                        listening={false}
-                        opacity={imageOpacity} // Image uses its own opacity control
-                    />
+                            ctx.beginPath();
+                            ctx.moveTo(tl, 0);
+                            ctx.lineTo(width - tr, 0);
+                            ctx.arcTo(width, 0, width, tr, tr);
+                            ctx.lineTo(width, height - br);
+                            ctx.arcTo(width, height, width - br, height, br);
+                            ctx.lineTo(bl, height);
+                            ctx.arcTo(0, height, 0, height - bl, bl);
+                            ctx.lineTo(0, tl);
+                            ctx.arcTo(0, 0, tl, 0, tl);
+                            ctx.closePath();
+                        }}
+                    >
+                        <Image
+                            image={zoneImage}
+                            {...(() => {
+                                const strokeWidth = shapeProps.strokeWidth || 2;
+                                const insetWidth = Math.max(0, shapeProps.width - strokeWidth);
+                                const insetHeight = Math.max(0, shapeProps.height - strokeWidth);
+                                const imageFit = shapeProps.imageFit || 'fill';
+
+                                let imageWidth = insetWidth;
+                                let imageHeight = insetHeight;
+                                let imageX = 0;
+                                let imageY = 0;
+
+                                if (zoneImage.width && zoneImage.height) {
+                                    const imageAspect = zoneImage.width / zoneImage.height;
+
+                                    if (imageFit === 'fit-width') {
+                                        // Scale to fit width, maintain aspect ratio
+                                        imageWidth = insetWidth;
+                                        imageHeight = insetWidth / imageAspect;
+                                        imageX = 0;
+                                        imageY = (insetHeight - imageHeight) / 2;
+                                    } else if (imageFit === 'fit-height') {
+                                        // Scale to fit height, maintain aspect ratio
+                                        imageHeight = insetHeight;
+                                        imageWidth = insetHeight * imageAspect;
+                                        imageX = (insetWidth - imageWidth) / 2;
+                                        imageY = 0;
+                                    } else {
+                                        // Fill - stretch to fill entire zone
+                                        imageWidth = insetWidth;
+                                        imageHeight = insetHeight;
+                                        imageX = 0;
+                                        imageY = 0;
+                                    }
+                                }
+
+                                return {
+                                    x: imageX,
+                                    y: imageY,
+                                    width: imageWidth,
+                                    height: imageHeight
+                                };
+                            })()}
+                            listening={false}
+                            opacity={imageOpacity} // Image uses its own opacity control
+                        />
+                    </Group>
                 )}
                 <Text
                     text={shapeProps.text || "Card Zone"}

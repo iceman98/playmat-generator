@@ -539,6 +539,44 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                 {selectedZone.zoneImage && (
                     <>
                         <div className={styles.controlGroup}>
+                            <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>Image Fit</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <label style={{ fontSize: '13px', cursor: 'pointer' }}>
+                                    <input
+                                        type="radio"
+                                        name="imageFit"
+                                        value="fit-width"
+                                        checked={(selectedZone.imageFit || 'fill') === 'fit-width'}
+                                        onChange={(e) => handleChange('imageFit', e.target.value)}
+                                        style={{ marginRight: '6px' }}
+                                    />
+                                    Fit to Width
+                                </label>
+                                <label style={{ fontSize: '13px', cursor: 'pointer' }}>
+                                    <input
+                                        type="radio"
+                                        name="imageFit"
+                                        value="fit-height"
+                                        checked={(selectedZone.imageFit || 'fill') === 'fit-height'}
+                                        onChange={(e) => handleChange('imageFit', e.target.value)}
+                                        style={{ marginRight: '6px' }}
+                                    />
+                                    Fit to Height
+                                </label>
+                                <label style={{ fontSize: '13px', cursor: 'pointer' }}>
+                                    <input
+                                        type="radio"
+                                        name="imageFit"
+                                        value="fill"
+                                        checked={(selectedZone.imageFit || 'fill') === 'fill'}
+                                        onChange={(e) => handleChange('imageFit', e.target.value)}
+                                        style={{ marginRight: '6px' }}
+                                    />
+                                    Fill (stretch)
+                                </label>
+                            </div>
+                        </div>
+                        <div className={styles.controlGroup}>
                             <label>Image Opacity: {selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1}</label>
                             <input
                                 type="range"
