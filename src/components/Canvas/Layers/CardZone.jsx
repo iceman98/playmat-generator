@@ -5,7 +5,8 @@ import {
     DEFAULT_GRID_ENABLED,
     DEFAULT_GRID_SIZE,
     DEFAULT_UNIT,
-    SCREEN_DPI
+    SCREEN_DPI,
+    TRANSFORMER_HANDLE_SIZE
 } from '../../../constants';
 
 const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false }) => {
@@ -31,6 +32,20 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
         }
     }, [isSelected]);
 
+    useEffect(() => {
+        if (shapeRef.current) {
+            // Override getClientRect to force selection box to match zone dimensions exactly
+            // ignoring overflowing text or images
+            shapeRef.current.getClientRect = (config) => {
+                const bboxRect = shapeRef.current.findOne('.bbox-rect');
+                if (bboxRect) {
+                    return bboxRect.getClientRect(config);
+                }
+                return { x: 0, y: 0, width: 0, height: 0 };
+            };
+        }
+    }, []);
+
     const imageOpacity = shapeProps.imageOpacity !== undefined ? shapeProps.imageOpacity : 1;
 
     return (
@@ -41,6 +56,8 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                 onTap={onSelect}
                 x={shapeProps.x}
                 y={shapeProps.y}
+                rotation={shapeProps.rotation || 0}
+                ref={shapeRef}
                 onDragStart={onSelect}
                 onDragEnd={(e) => {
                     onChange({
@@ -49,7 +66,33 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         y: snapToGrid(e.target.y()),
                     });
                 }}
+                onTransformEnd={(e) => {
+                    const node = shapeRef.current;
+                    const scaleX = node.scaleX();
+                    const scaleY = node.scaleY();
+
+                    node.scaleX(1);
+                    node.scaleY(1);
+                    onChange({
+                        ...shapeProps,
+                        x: snapToGrid(node.x()),
+                        y: snapToGrid(node.y()),
+                        rotation: node.rotation(),
+                        width: snapToGrid(Math.max(5, shapeProps.width * scaleX)),
+                        height: snapToGrid(Math.max(5, shapeProps.height * scaleY)),
+                    });
+                }}
             >
+                {/* Invisible Rect for accurate bounding box calculation */}
+                <Rect
+                    name="bbox-rect"
+                    x={0}
+                    y={0}
+                    width={shapeProps.width}
+                    height={shapeProps.height}
+                    opacity={0}
+                    listening={false}
+                />
                 {/* Background rectangle with selective corner radius - inset by half stroke width */}
                 <Rect
                     x={(() => {
@@ -90,28 +133,12 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         ];
                     })()}
                     opacity={1} // Fill uses its own alpha from fill color
-                    ref={shapeRef}
                     shadowEnabled={shapeProps.borderShadow || false}
                     shadowOffsetX={shapeProps.borderShadowX || 3}
                     shadowOffsetY={shapeProps.borderShadowY || 3}
                     shadowBlur={shapeProps.borderShadowBlur || 5}
                     shadowColor={shapeProps.borderShadowColor || '#000000'}
                     shadowOpacity={1} // Shadow uses its own alpha from shadowColor
-                    onTransformEnd={(e) => {
-                        const node = shapeRef.current;
-                        const scaleX = node.scaleX();
-                        const scaleY = node.scaleY();
-
-                        node.scaleX(1);
-                        node.scaleY(1);
-                        onChange({
-                            ...shapeProps,
-                            x: snapToGrid(node.parent.x()),
-                            y: snapToGrid(node.parent.y()),
-                            width: snapToGrid(Math.max(5, node.width() * scaleX)),
-                            height: snapToGrid(Math.max(5, node.height() * scaleY)),
-                        });
-                    }}
                 />
                 {/* Individual border lines for selective rendering with corner radius */}
                 {shapeProps.borderTop !== false && (
@@ -364,6 +391,9 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         }
                         return newBox;
                     }}
+                    anchorSize={TRANSFORMER_HANDLE_SIZE}
+                    anchorCornerRadius={1}
+                    anchorStrokeWidth={1}
                 />
             )}
         </React.Fragment>

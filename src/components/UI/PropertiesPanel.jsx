@@ -311,6 +311,16 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                         />
                     </div>
                 </div>
+                <div className={styles.controlGroup}>
+                    <label>Rotation (deg)</label>
+                    <input
+                        type="number"
+                        className={styles.input}
+                        value={Math.round(selectedZone.rotation || 0)}
+                        onChange={(e) => handleChange('rotation', Number(e.target.value))}
+                        onFocus={handleFocus}
+                    />
+                </div>
             </div>
 
             <div className={styles.section}>

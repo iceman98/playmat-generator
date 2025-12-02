@@ -72,6 +72,7 @@ export const DEFAULT_ZONE = {
     borderRight: true,
     borderBottom: true,
     borderLeft: true,
+    rotation: 0,
 };
 
 // ----------------------------------------------------------------------------
@@ -106,3 +107,4 @@ export const EXPORT_DELAY_MS = 50; // Delay before export to ensure render
 // TRANSFORMER SETTINGS
 // ----------------------------------------------------------------------------
 export const MIN_TRANSFORM_SIZE = 5; // Minimum width/height for transformations
+export const TRANSFORMER_HANDLE_SIZE = 6;

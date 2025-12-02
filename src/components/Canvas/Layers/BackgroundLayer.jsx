@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
+import { TRANSFORMER_HANDLE_SIZE } from '../../../constants';
 
 const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSelected, onSelect, width, height, isPanning = false }) => {
     const [image] = useImage(imageUrl, 'anonymous');
@@ -135,6 +136,9 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
                         return newBox;
                     }}
                     rotateEnabled={false}
+                    anchorSize={TRANSFORMER_HANDLE_SIZE}
+                    anchorCornerRadius={1}
+                    anchorStrokeWidth={1}
                 />
             )}
         </React.Fragment>
