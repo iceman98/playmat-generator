@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Type, Box, Palette, Move, RotateCw, Maximize, Image as ImageIcon } from 'lucide-react';
+import { X, Type, Box, Palette, Move, RotateCw, Maximize, Image as ImageIcon, ArrowLeftRight, ArrowUpDown, Maximize2, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Crosshair } from 'lucide-react';
 import CompactColorPicker from './CompactColorPicker';
 import styles from './PropertiesPanel.module.css';
 
@@ -162,6 +162,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                                 });
                             }}
                         >
+                            <ArrowLeftRight size={14} style={{ marginRight: 6 }} />
                             Fit to Width
                         </button>
                         <button
@@ -183,6 +184,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                                 });
                             }}
                         >
+                            <ArrowUpDown size={14} style={{ marginRight: 6 }} />
                             Fit to Height
                         </button>
                         <button
@@ -206,7 +208,67 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                                 });
                             }}
                         >
+                            <Maximize2 size={14} style={{ marginRight: 6 }} />
                             Fill
+                        </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageWidth) return;
+                                // matSize is in cm, convert to inches then to pixels
+                                const matWidthInches = matSize.width / 2.54;
+                                const matWidthPx = matWidthInches * dpi;
+                                const currentScaleX = backgroundAttrs.scaleX || 1;
+                                const scaledWidth = backgroundAttrs.imageWidth * currentScaleX;
+                                onUpdateBackground({
+                                    ...backgroundAttrs,
+                                    x: (matWidthPx - scaledWidth) / 2
+                                });
+                            }}
+                        >
+                            <AlignHorizontalJustifyCenter size={14} style={{ marginRight: 6 }} />
+                            Center H
+                        </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageHeight) return;
+                                // matSize is in cm, convert to inches then to pixels
+                                const matHeightInches = matSize.height / 2.54;
+                                const matHeightPx = matHeightInches * dpi;
+                                const currentScaleY = backgroundAttrs.scaleY || 1;
+                                const scaledHeight = backgroundAttrs.imageHeight * currentScaleY;
+                                onUpdateBackground({
+                                    ...backgroundAttrs,
+                                    y: (matHeightPx - scaledHeight) / 2
+                                });
+                            }}
+                        >
+                            <AlignVerticalJustifyCenter size={14} style={{ marginRight: 6 }} />
+                            Center V
+                        </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageWidth || !backgroundAttrs?.imageHeight) return;
+                                // matSize is in cm, convert to inches then to pixels
+                                const matWidthInches = matSize.width / 2.54;
+                                const matWidthPx = matWidthInches * dpi;
+                                const matHeightInches = matSize.height / 2.54;
+                                const matHeightPx = matHeightInches * dpi;
+                                const currentScaleX = backgroundAttrs.scaleX || 1;
+                                const currentScaleY = backgroundAttrs.scaleY || 1;
+                                const scaledWidth = backgroundAttrs.imageWidth * currentScaleX;
+                                const scaledHeight = backgroundAttrs.imageHeight * currentScaleY;
+                                onUpdateBackground({
+                                    ...backgroundAttrs,
+                                    x: (matWidthPx - scaledWidth) / 2,
+                                    y: (matHeightPx - scaledHeight) / 2
+                                });
+                            }}
+                        >
+                            <Crosshair size={14} style={{ marginRight: 6 }} />
+                            Center
                         </button>
                     </div>
                 </div>
