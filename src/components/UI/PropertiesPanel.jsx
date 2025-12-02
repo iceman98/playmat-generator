@@ -147,56 +147,43 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             className={styles.actionButton}
                             onClick={() => {
                                 if (!backgroundAttrs?.imageWidth) return;
-                                const matWidthPx = matSize.width * dpi;
+                                // matSize is in cm, convert to inches then to pixels
+                                const matWidthInches = matSize.width / 2.54;
+                                const matWidthPx = matWidthInches * dpi;
                                 const scale = matWidthPx / backgroundAttrs.imageWidth;
-                                handleChange('scaleX', scale);
-                                handleChange('scaleY', scale);
-                                handleChange('x', 0);
-                                handleChange('y', (matSize.height * dpi - backgroundAttrs.imageHeight * scale) / 2);
+                                const matHeightInches = matSize.height / 2.54;
+                                const matHeightPx = matHeightInches * dpi;
+                                onUpdateBackground({
+                                    ...backgroundAttrs,
+                                    scaleX: scale,
+                                    scaleY: scale,
+                                    x: 0,
+                                    y: (matHeightPx - backgroundAttrs.imageHeight * scale) / 2
+                                });
                             }}
                         >
-                            Fit Width
+                            Fit to Width
                         </button>
                         <button
                             className={styles.actionButton}
                             onClick={() => {
                                 if (!backgroundAttrs?.imageHeight) return;
-                                const matHeightPx = matSize.height * dpi;
+                                // matSize is in cm, convert to inches then to pixels
+                                const matHeightInches = matSize.height / 2.54;
+                                const matHeightPx = matHeightInches * dpi;
                                 const scale = matHeightPx / backgroundAttrs.imageHeight;
-                                handleChange('scaleX', scale);
-                                handleChange('scaleY', scale);
-                                handleChange('x', (matSize.width * dpi - backgroundAttrs.imageWidth * scale) / 2);
-                                handleChange('y', 0);
+                                const matWidthInches = matSize.width / 2.54;
+                                const matWidthPx = matWidthInches * dpi;
+                                onUpdateBackground({
+                                    ...backgroundAttrs,
+                                    scaleX: scale,
+                                    scaleY: scale,
+                                    x: (matWidthPx - backgroundAttrs.imageWidth * scale) / 2,
+                                    y: 0
+                                });
                             }}
                         >
-                            Fit Height
-                        </button>
-                        <button
-                            className={styles.actionButton}
-                            onClick={() => {
-                                if (!backgroundAttrs?.imageWidth || !backgroundAttrs?.imageHeight) return;
-                                const matWidthPx = matSize.width * dpi;
-                                const matHeightPx = matSize.height * dpi;
-                                const scale = Math.max(matWidthPx / backgroundAttrs.imageWidth, matHeightPx / backgroundAttrs.imageHeight);
-                                handleChange('scaleX', scale);
-                                handleChange('scaleY', scale);
-                                handleChange('x', (matWidthPx - backgroundAttrs.imageWidth * scale) / 2);
-                                handleChange('y', (matHeightPx - backgroundAttrs.imageHeight * scale) / 2);
-                            }}
-                        >
-                            Fill Mat
-                        </button>
-                        <button
-                            className={styles.actionButton}
-                            onClick={() => {
-                                handleChange('scaleX', 1);
-                                handleChange('scaleY', 1);
-                                handleChange('rotation', 0);
-                                handleChange('x', 0);
-                                handleChange('y', 0);
-                            }}
-                        >
-                            Reset 1:1
+                            Fit to Height
                         </button>
                     </div>
                 </div>
