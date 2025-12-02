@@ -185,6 +185,29 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                         >
                             Fit to Height
                         </button>
+                        <button
+                            className={styles.actionButton}
+                            onClick={() => {
+                                if (!backgroundAttrs?.imageWidth || !backgroundAttrs?.imageHeight) return;
+                                // matSize is in cm, convert to inches then to pixels
+                                const matWidthInches = matSize.width / 2.54;
+                                const matWidthPx = matWidthInches * dpi;
+                                const matHeightInches = matSize.height / 2.54;
+                                const matHeightPx = matHeightInches * dpi;
+                                // Scale independently to fill the entire playmat
+                                const scaleX = matWidthPx / backgroundAttrs.imageWidth;
+                                const scaleY = matHeightPx / backgroundAttrs.imageHeight;
+                                onUpdateBackground({
+                                    ...backgroundAttrs,
+                                    scaleX: scaleX,
+                                    scaleY: scaleY,
+                                    x: 0,
+                                    y: 0
+                                });
+                            }}
+                        >
+                            Fill
+                        </button>
                     </div>
                 </div>
             </div>
