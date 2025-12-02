@@ -54,7 +54,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                 <Rect
                     width={shapeProps.width}
                     height={shapeProps.height}
-                    fill={shapeProps.noFill ? 'transparent' : (shapeProps.fill || 'rgba(255, 255, 255, 0.3)')}
+                    fill={shapeProps.fill || 'rgba(255, 255, 255, 0.3)'}
                     stroke="transparent"
                     cornerRadius={(() => {
                         const r = shapeProps.cornerRadius || 0;
@@ -109,7 +109,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {shapeProps.borderRight !== false && (
@@ -125,7 +125,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {shapeProps.borderBottom !== false && (
@@ -141,7 +141,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {shapeProps.borderLeft !== false && (
@@ -157,7 +157,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
 
@@ -169,7 +169,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {/* Top-Right Corner */}
@@ -179,7 +179,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {/* Bottom-Right Corner */}
@@ -189,7 +189,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {/* Bottom-Left Corner */}
@@ -199,7 +199,7 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                         stroke={shapeProps.stroke || '#000000'}
                         strokeWidth={shapeProps.strokeWidth || 2}
                         listening={false}
-                                            opacity={1} // Border uses its own alpha from stroke color
+                        opacity={1} // Border uses its own alpha from stroke color
                     />
                 )}
                 {zoneImage && (

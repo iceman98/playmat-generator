@@ -55,7 +55,6 @@ export const DEFAULT_ZONE = {
     fontStyle: 'bold',
     textColor: '#ffffff80', // white with full alpha as hex
     textPosition: 'bottom-out', // 'top', 'bottom', 'center', 'top-out', 'bottom-out'
-    noFill: false,
     textStroke: 0,
     textStrokeColor: '#00000080', // black with full alpha as hex
     textShadow: false,

@@ -527,21 +527,8 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                                     console.error('Error in fill picker:', error, colorData);
                                 }
                             }}
-                            disabled={selectedZone.noFill}
                         />
                     </div>
-                </div>
-
-                <div className={styles.controlGroup}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={selectedZone.noFill || false}
-                            onChange={(e) => handleChange('noFill', e.target.checked)}
-                            style={{ marginRight: '8px' }}
-                        />
-                        Transparent Fill (No Fill)
-                    </label>
                 </div>
 
                 <div className={styles.controlGroup}>
@@ -668,7 +655,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                     />
                 </div>
 
-                </div>
+            </div>
 
             <div className={styles.section} style={{ borderBottom: 'none' }}>
                 <button
