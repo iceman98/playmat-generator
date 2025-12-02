@@ -50,25 +50,43 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     });
                 }}
             >
-                {/* Background rectangle with selective corner radius */}
+                {/* Background rectangle with selective corner radius - inset by half stroke width */}
                 <Rect
-                    width={shapeProps.width}
-                    height={shapeProps.height}
+                    x={(() => {
+                        const strokeWidth = shapeProps.strokeWidth || 2;
+                        return strokeWidth / 2;
+                    })()}
+                    y={(() => {
+                        const strokeWidth = shapeProps.strokeWidth || 2;
+                        return strokeWidth / 2;
+                    })()}
+                    width={(() => {
+                        const strokeWidth = shapeProps.strokeWidth || 2;
+                        return Math.max(0, shapeProps.width - strokeWidth);
+                    })()}
+                    height={(() => {
+                        const strokeWidth = shapeProps.strokeWidth || 2;
+                        return Math.max(0, shapeProps.height - strokeWidth);
+                    })()}
                     fill={shapeProps.fill || 'rgba(255, 255, 255, 0.3)'}
                     stroke="transparent"
                     cornerRadius={(() => {
                         const r = shapeProps.cornerRadius || 0;
+                        const strokeWidth = shapeProps.strokeWidth || 2;
                         const hasTop = shapeProps.borderTop !== false;
                         const hasRight = shapeProps.borderRight !== false;
                         const hasBottom = shapeProps.borderBottom !== false;
                         const hasLeft = shapeProps.borderLeft !== false;
 
+                        // Adjust corner radius to account for inset
+                        const adjustedRadius = Math.max(0, r - strokeWidth / 2);
+
                         // Return array [topLeft, topRight, bottomRight, bottomLeft]
                         return [
-                            hasTop && hasLeft ? r : 0,      // top-left
-                            hasTop && hasRight ? r : 0,     // top-right
-                            hasBottom && hasRight ? r : 0,  // bottom-right
-                            hasBottom && hasLeft ? r : 0    // bottom-left
+                            hasTop && hasLeft ? adjustedRadius : 0,      // top-left
+                            hasTop && hasRight ? adjustedRadius : 0,     // top-right
+                            hasBottom && hasRight ? adjustedRadius : 0,  // bottom-right
+                            hasBottom && hasLeft ? adjustedRadius : 0    // bottom-left
                         ];
                     })()}
                     opacity={1} // Fill uses its own alpha from fill color
@@ -205,20 +223,38 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                 {zoneImage && (
                     <Image
                         image={zoneImage}
-                        width={shapeProps.width}
-                        height={shapeProps.height}
+                        x={(() => {
+                            const strokeWidth = shapeProps.strokeWidth || 2;
+                            return strokeWidth / 2;
+                        })()}
+                        y={(() => {
+                            const strokeWidth = shapeProps.strokeWidth || 2;
+                            return strokeWidth / 2;
+                        })()}
+                        width={(() => {
+                            const strokeWidth = shapeProps.strokeWidth || 2;
+                            return Math.max(0, shapeProps.width - strokeWidth);
+                        })()}
+                        height={(() => {
+                            const strokeWidth = shapeProps.strokeWidth || 2;
+                            return Math.max(0, shapeProps.height - strokeWidth);
+                        })()}
                         cornerRadius={(() => {
                             const r = shapeProps.cornerRadius || 0;
+                            const strokeWidth = shapeProps.strokeWidth || 2;
                             const hasTop = shapeProps.borderTop !== false;
                             const hasRight = shapeProps.borderRight !== false;
                             const hasBottom = shapeProps.borderBottom !== false;
                             const hasLeft = shapeProps.borderLeft !== false;
 
+                            // Adjust corner radius to account for inset
+                            const adjustedRadius = Math.max(0, r - strokeWidth / 2);
+
                             return [
-                                hasTop && hasLeft ? r : 0,
-                                hasTop && hasRight ? r : 0,
-                                hasBottom && hasRight ? r : 0,
-                                hasBottom && hasLeft ? r : 0
+                                hasTop && hasLeft ? adjustedRadius : 0,
+                                hasTop && hasRight ? adjustedRadius : 0,
+                                hasBottom && hasRight ? adjustedRadius : 0,
+                                hasBottom && hasLeft ? adjustedRadius : 0
                             ];
                         })()}
                         listening={false}
