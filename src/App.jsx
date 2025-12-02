@@ -73,14 +73,15 @@ function App() {
   // Load project from localStorage on mount
   useEffect(() => {
     const savedProject = loadProjectFromLocalStorage();
-    
+
     if (savedProject) {
       // Restore all project state
       if (savedProject.backgroundImage) {
         setBackgroundImage(savedProject.backgroundImage);
       }
       if (savedProject.backgroundAttrs) {
-        setBackgroundAttrs(savedProject.backgroundAttrs);
+        const { rotation, ...cleanAttrs } = savedProject.backgroundAttrs;
+        setBackgroundAttrs(cleanAttrs);
       }
       if (savedProject.zones) {
         setZones(savedProject.zones);
@@ -102,7 +103,7 @@ function App() {
         setGridSize(savedProject.gridSize);
       }
     }
-    
+
     // Set loading to false after loading is complete
     setIsLoading(false);
   }, []);
@@ -111,10 +112,10 @@ function App() {
   useEffect(() => {
     // Don't auto-save during initial loading
     if (isLoading) return;
-    
+
     const projectData = {
       backgroundImage,
-      backgroundAttrs,
+      backgroundAttrs: backgroundAttrs ? (({ rotation, ...rest }) => rest)(backgroundAttrs) : null,
       zones,
       // selectedId removed - don't save selection to localStorage
       matSize,
@@ -124,7 +125,7 @@ function App() {
       gridSize,
       timestamp: Date.now()
     };
-    
+
     saveProjectToLocalStorage(projectData);
     setLastSaved(Date.now());
   }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize]);

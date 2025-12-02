@@ -12,7 +12,7 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
     const handleMouseDown = (e) => {
         // Check if mouse down was with middle click (button 1, which 2, buttons 4)
         const isMiddleClick = e.evt?.button === 1 || e.evt?.which === 2 || (e.evt?.buttons & 4) === 4;
-        
+
         if (isMiddleClick) {
             setDragStartedWithMiddleClick(true);
             // Only select if already selected
@@ -36,7 +36,7 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
             e.evt?.stopPropagation();
             return;
         }
-        
+
         onSelect();
     };
 
@@ -48,7 +48,7 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
     const handleDragEnd = (e) => {
         setIsDragging(false);
         setDragStartedWithMiddleClick(false);
-        
+
         onBackgroundChange({
             ...backgroundAttrs,
             x: e.target.x(),
@@ -76,7 +76,6 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
                     y: (height - image.height * scale) / 2,
                     scaleX: scale,
                     scaleY: scale,
-                    rotation: 0,
                     imageWidth: image.width,
                     imageHeight: image.height,
                 };
@@ -122,7 +121,6 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
                         y: node.y(),
                         scaleX: scaleX,
                         scaleY: scaleY,
-                        rotation: node.rotation(),
                     });
                 }}
             />
@@ -136,6 +134,7 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
                         }
                         return newBox;
                     }}
+                    rotateEnabled={false}
                 />
             )}
         </React.Fragment>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Type, Box, Palette, Move, RotateCw, Maximize, Image as ImageIcon, ArrowLeftRight, ArrowUpDown, Maximize2, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Crosshair } from 'lucide-react';
+import { X, Type, Box, Palette, Move, Maximize, Image as ImageIcon, ArrowLeftRight, ArrowUpDown, Maximize2, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Crosshair } from 'lucide-react';
 import CompactColorPicker from './CompactColorPicker';
 import styles from './PropertiesPanel.module.css';
 
@@ -109,15 +109,7 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                             onChange={(e) => handleChange('scaleY', Number(e.target.value))}
                         />
                     </div>
-                    <div className={styles.controlGroup}>
-                        <label>Rotation (deg)</label>
-                        <input
-                            type="number"
-                            className={styles.input}
-                            value={Math.round(backgroundAttrs?.rotation || 0)}
-                            onChange={(e) => handleChange('rotation', Number(e.target.value))}
-                        />
-                    </div>
+
                     <div className={styles.row}>
                         <div className={`${styles.controlGroup} ${styles.col}`}>
                             <label>X</label>
