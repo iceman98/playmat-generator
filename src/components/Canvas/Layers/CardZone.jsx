@@ -355,23 +355,23 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     shadowColor={shapeProps.textShadowColor || '#000000'}
                     shadowOpacity={1} // Shadow uses its own alpha from shadowColor
                     {...(() => {
-                        const padding = 5;
                         const textHeight = shapeProps.fontSize || 14;
                         const position = shapeProps.textPosition || 'center';
+                        const distance = shapeProps.textDistance !== undefined ? shapeProps.textDistance : 10;
 
                         let y = 0;
                         switch (position) {
                             case 'top':
-                                y = padding;
+                                y = distance;
                                 break;
                             case 'bottom':
-                                y = shapeProps.height - textHeight - padding;
+                                y = shapeProps.height - textHeight - distance;
                                 break;
                             case 'top-out':
-                                y = -textHeight - padding;
+                                y = -textHeight - distance;
                                 break;
                             case 'bottom-out':
-                                y = shapeProps.height + padding;
+                                y = shapeProps.height + distance;
                                 break;
                             case 'center':
                             default:

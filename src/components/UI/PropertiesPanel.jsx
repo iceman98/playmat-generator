@@ -440,6 +440,21 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                     </select>
                 </div>
 
+                {(selectedZone.textPosition === 'top' || selectedZone.textPosition === 'bottom' || 
+                  selectedZone.textPosition === 'top-out' || selectedZone.textPosition === 'bottom-out') && (
+                    <div className={styles.controlGroup}>
+                        <label>Distance from Edge</label>
+                        <input
+                            type="number"
+                            className={styles.input}
+                            value={selectedZone.textDistance !== undefined ? selectedZone.textDistance : 10}
+                            onChange={(e) => handleChange('textDistance', Number(e.target.value))}
+                            onFocus={handleFocus}
+                            min="0"
+                        />
+                    </div>
+                )}
+
                 <div className={styles.controlGroup}>
                     <label>Text Outline Width: {selectedZone.textStroke || 0}px</label>
                     <input
