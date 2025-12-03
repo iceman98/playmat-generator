@@ -91,6 +91,25 @@
     box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+.input[type="select"],
+select.input {
+    background: rgba(30, 30, 35, 0.8);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.input[type="select"]:hover,
+select.input:hover {
+    background: rgba(40, 40, 45, 0.9);
+}
+
+.input[type="select"] option,
+select.input option {
+    background: #2a2a2a;
+    color: #ffffff;
+    padding: 8px;
+}
+
 .row {
     display: flex;
     gap: 10px;
