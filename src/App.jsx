@@ -71,6 +71,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [projectName, setProjectName] = useState(DEFAULT_PROJECT_NAME);
   const [defaultZoneSize, setDefaultZoneSize] = useState(DEFAULT_ZONE_SIZE_CM);
+  const [backgroundUrl, setBackgroundUrl] = useState(null);
+  const [backgroundType, setBackgroundType] = useState('url'); // 'url' or 'upload'
   const stageRef = useRef(null);
 
   // Load project from localStorage on mount
@@ -79,8 +81,16 @@ function App() {
 
     if (savedProject) {
       // Restore all project state
-      if (savedProject.backgroundImage) {
+      if (savedProject.backgroundType === 'upload' && savedProject.backgroundImage) {
+        // Uploaded image (base64)
         setBackgroundImage(savedProject.backgroundImage);
+        setBackgroundUrl(null);
+        setBackgroundType('upload');
+      } else if (savedProject.backgroundType === 'url' && savedProject.backgroundUrl) {
+        // External URL
+        setBackgroundUrl(savedProject.backgroundUrl);
+        setBackgroundImage(savedProject.backgroundUrl);
+        setBackgroundType('url');
       }
       if (savedProject.backgroundAttrs) {
         const { rotation, ...cleanAttrs } = savedProject.backgroundAttrs;
@@ -120,8 +130,10 @@ function App() {
     if (isLoading) return;
 
     const projectData = {
-      backgroundImage,
+      backgroundImage: backgroundType === 'upload' ? backgroundImage : null,
       backgroundAttrs: backgroundAttrs ? (({ rotation, ...rest }) => rest)(backgroundAttrs) : null,
+      backgroundUrl: backgroundType === 'url' ? backgroundUrl : null,
+      backgroundType: backgroundType,
       zones,
       // selectedId removed - don't save selection to localStorage
       matSize,
@@ -136,13 +148,15 @@ function App() {
 
     saveProjectToLocalStorage(projectData);
     setLastSaved(Date.now());
-  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName, defaultZoneSize]);
+  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName, defaultZoneSize, backgroundUrl, backgroundType]);
 
   // Create new project function
   const handleNewProject = () => {
     if (window.confirm('¿Crear un nuevo proyecto? El proyecto actual se perderá si no se ha guardado.')) {
       clearProjectFromLocalStorage();
       setBackgroundImage(null);
+      setBackgroundUrl(null);
+      setBackgroundType('url');
       setBackgroundAttrs(null);
       setZones([]);
       selectShape(null);
@@ -161,8 +175,10 @@ function App() {
   // Download project as JSON
   const handleDownloadProject = () => {
     const projectData = {
-      backgroundImage,
+      backgroundImage: backgroundType === 'upload' ? backgroundImage : null,
       backgroundAttrs: backgroundAttrs ? (({ rotation, ...rest }) => rest)(backgroundAttrs) : null,
+      backgroundUrl: backgroundType === 'url' ? backgroundUrl : null,
+      backgroundType: backgroundType,
       zones,
       matSize,
       unit,
@@ -170,6 +186,7 @@ function App() {
       gridEnabled,
       gridSize,
       projectName,
+      defaultZoneSize,
       timestamp: Date.now(),
       version: '1.0'
     };
@@ -204,8 +221,26 @@ function App() {
         // Validate project data structure
         if (projectData && typeof projectData === 'object') {
           // Restore all project state
-          if (projectData.backgroundImage !== undefined) {
+          if (projectData.backgroundType === 'upload' && projectData.backgroundImage) {
+            // Uploaded image (base64)
             setBackgroundImage(projectData.backgroundImage);
+            setBackgroundUrl(null);
+            setBackgroundType('upload');
+          } else if (projectData.backgroundType === 'url' && projectData.backgroundUrl) {
+            // External URL
+            setBackgroundUrl(projectData.backgroundUrl);
+            setBackgroundImage(projectData.backgroundUrl);
+            setBackgroundType('url');
+          } else if (projectData.backgroundUrl) {
+            // Legacy support for old projects (URL only)
+            setBackgroundUrl(projectData.backgroundUrl);
+            setBackgroundImage(projectData.backgroundUrl);
+            setBackgroundType('url');
+          } else if (projectData.backgroundImage) {
+            // Legacy support for very old projects (base64 only)
+            setBackgroundImage(projectData.backgroundImage);
+            setBackgroundUrl(null);
+            setBackgroundType('upload');
           }
           if (projectData.backgroundAttrs) {
             const { rotation, ...cleanAttrs } = projectData.backgroundAttrs;
@@ -231,6 +266,12 @@ function App() {
           }
           if (projectData.projectName) {
             setProjectName(projectData.projectName);
+          }
+          if (projectData.defaultZoneSize) {
+            setDefaultZoneSize(projectData.defaultZoneSize);
+          }
+          if (projectData.backgroundType) {
+            setBackgroundType(projectData.backgroundType);
           }
           
           // Clear selection
@@ -314,8 +355,17 @@ function App() {
   }, [selectedId, zones]);
 
 
-  const handleSetBackground = (url) => {
-    setBackgroundImage(url);
+  const handleSetBackgroundUrl = (url) => {
+    setBackgroundUrl(url);
+    setBackgroundImage(url); // Set the URL as the image source
+    setBackgroundType('url');
+    setBackgroundAttrs(null); // Reset transform when image changes
+  };
+
+  const handleSetBackgroundUpload = (base64Data) => {
+    setBackgroundImage(base64Data);
+    setBackgroundUrl(null);
+    setBackgroundType('upload');
     setBackgroundAttrs(null); // Reset transform when image changes
   };
 
@@ -363,7 +413,8 @@ function App() {
   return (
     <div className="app">
       <Sidebar
-        onSetBackground={handleSetBackground}
+        onSetBackgroundUrl={handleSetBackgroundUrl}
+        onSetBackgroundUpload={handleSetBackgroundUpload}
         onAddZone={handleAddZone}
         onExport={handleExport}
         onNewProject={handleNewProject}
@@ -387,6 +438,7 @@ function App() {
         onSetProjectName={setProjectName}
         defaultZoneSize={defaultZoneSize}
         onSetDefaultZoneSize={setDefaultZoneSize}
+        backgroundType={backgroundType}
       />
       <DesignStage
         ref={stageRef}

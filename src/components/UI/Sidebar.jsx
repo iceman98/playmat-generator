@@ -3,9 +3,11 @@ import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save,
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize }) => {
+const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize, backgroundType }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
+    const [backgroundInputType, setBackgroundInputType] = useState(backgroundType || 'url'); // 'url' or 'upload'
+    const [urlInput, setUrlInput] = useState('');
 
     // Select all text when focusing on numeric inputs
     const handleFocus = (e) => {
@@ -16,7 +18,27 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
         e.preventDefault();
         if (searchQuery) {
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(searchQuery)}`;
-            onSetBackground(url);
+            onSetBackgroundUrl(url);
+            setSearchQuery('');
+        }
+    };
+
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                onSetBackgroundUpload(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleUrlSubmit = (e) => {
+        e.preventDefault();
+        if (urlInput.trim()) {
+            onSetBackgroundUrl(urlInput.trim());
+            setUrlInput('');
         }
     };
 
@@ -36,6 +58,7 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
         'https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=2832&auto=format&fit=crop', // Galaxy
         'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2942&auto=format&fit=crop', // Gaming
         'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2868&auto=format&fit=crop', // Abstract
+        'https://images.unsplash.com/photo-1582921017967-79d1cb6702ee?q=80&w=2670&auto=format&fit=crop', // Train
     ];
 
     return (
@@ -117,16 +140,16 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                 {activeTab === 'background' && (
                     <div className={styles.panel}>
                         <h3>Background</h3>
-                        <form onSubmit={handleSearch} className={styles.searchForm}>
+                        <form onSubmit={handleUrlSubmit} className={styles.searchForm}>
                             <input
                                 type="text"
-                                placeholder="Search images (e.g. 'dragon', 'space')"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Paste image URL here..."
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
                                 className={styles.searchInput}
                             />
                             <button type="submit" className={styles.searchButton}>
-                                <Search size={16} />
+                                <ImageIcon size={16} />
                             </button>
                         </form>
 
@@ -135,16 +158,7 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = (event) => {
-                                            onSetBackground(event.target.result);
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                }}
+                                onChange={handleFileUpload}
                                 className={styles.input}
                             />
                         </div>
@@ -156,7 +170,7 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                                     <div
                                         key={i}
                                         className={styles.thumbnail}
-                                        onClick={() => onSetBackground(url)}
+                                        onClick={() => onSetBackgroundUrl(url)}
                                         style={{ backgroundImage: `url(${url})` }}
                                     />
                                 ))}
