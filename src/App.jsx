@@ -70,6 +70,7 @@ function App() {
   const [lastSaved, setLastSaved] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [projectName, setProjectName] = useState(DEFAULT_PROJECT_NAME);
+  const [defaultZoneSize, setDefaultZoneSize] = useState(DEFAULT_ZONE_SIZE_CM);
   const stageRef = useRef(null);
 
   // Load project from localStorage on mount
@@ -129,12 +130,13 @@ function App() {
       gridEnabled,
       gridSize,
       projectName,
+      defaultZoneSize,
       timestamp: Date.now()
     };
 
     saveProjectToLocalStorage(projectData);
     setLastSaved(Date.now());
-  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName]);
+  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName, defaultZoneSize]);
 
   // Create new project function
   const handleNewProject = () => {
@@ -152,6 +154,7 @@ function App() {
       setCopiedZone(null);
       setLastSaved(null);
       setProjectName(DEFAULT_PROJECT_NAME);
+      setDefaultZoneSize(DEFAULT_ZONE_SIZE_CM);
     }
   };
 
@@ -318,8 +321,8 @@ function App() {
 
   const handleAddZone = () => {
     // Convert zone size from cm to inches to pixels
-    const widthInches = DEFAULT_ZONE_SIZE_CM.width / 2.54;
-    const heightInches = DEFAULT_ZONE_SIZE_CM.height / 2.54;
+    const widthInches = defaultZoneSize.width / 2.54;
+    const heightInches = defaultZoneSize.height / 2.54;
     const widthPx = widthInches * SCREEN_DPI;
     const heightPx = heightInches * SCREEN_DPI;
 
@@ -382,6 +385,8 @@ function App() {
         lastSaved={lastSaved}
         projectName={projectName}
         onSetProjectName={setProjectName}
+        defaultZoneSize={defaultZoneSize}
+        onSetDefaultZoneSize={setDefaultZoneSize}
       />
       <DesignStage
         ref={stageRef}

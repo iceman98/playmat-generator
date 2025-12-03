@@ -3,7 +3,7 @@ import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save,
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName }) => {
+const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
 
@@ -307,6 +307,46 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                                 }}
                                 className={styles.input}
                             />
+                        </div>
+
+                        <div className={styles.settingGroup}>
+                            <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>Default Zone Size ({unit})</h4>
+                            <div className={styles.row}>
+                                <div className={`${styles.col}`}>
+                                    <label>Width</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0.1"
+                                        value={unit === 'inch' ? Math.round(defaultZoneSize.width / 2.54 * 100) / 100 : Math.round(defaultZoneSize.width * 100) / 100}
+                                        onChange={(e) => {
+                                            const val = Number(e.target.value);
+                                            onSetDefaultZoneSize({
+                                                ...defaultZoneSize,
+                                                width: unit === 'inch' ? val * 2.54 : val
+                                            });
+                                        }}
+                                        className={styles.input}
+                                    />
+                                </div>
+                                <div className={`${styles.col}`}>
+                                    <label>Height</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0.1"
+                                        value={unit === 'inch' ? Math.round(defaultZoneSize.height / 2.54 * 100) / 100 : Math.round(defaultZoneSize.height * 100) / 100}
+                                        onChange={(e) => {
+                                            const val = Number(e.target.value);
+                                            onSetDefaultZoneSize({
+                                                ...defaultZoneSize,
+                                                height: unit === 'inch' ? val * 2.54 : val
+                                            });
+                                        }}
+                                        className={styles.input}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
