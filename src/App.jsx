@@ -1,19 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import DesignStage from './components/Canvas/DesignStage';
+import { DEFAULT_ZONE, DEFAULT_ZONE_SIZE_CM, DEFAULT_PROJECT_NAME, SCREEN_DPI, DEFAULT_MAT_SIZE, DEFAULT_UNIT, DEFAULT_EXPORT_DPI, DEFAULT_GRID_ENABLED, DEFAULT_GRID_SIZE } from './constants';
 import Sidebar from './components/UI/Sidebar';
+import DesignStage from './components/Canvas/DesignStage';
 import PropertiesPanel from './components/UI/PropertiesPanel';
-import {
-  DEFAULT_MAT_SIZE,
-  DEFAULT_EXPORT_DPI,
-  DEFAULT_GRID_ENABLED,
-  DEFAULT_GRID_SIZE,
-  DEFAULT_UNIT,
-  DEFAULT_ZONE,
-  DEFAULT_ZONE_SIZE_CM,
-  DEFAULT_PROJECT_NAME,
-  SCREEN_DPI
-} from './constants';
-import './index.css';
+import ImageSearchModal from './components/UI/ImageSearchModal';
+import './App.css';
 
 // LocalStorage keys
 const LS_KEYS = {
@@ -73,6 +64,8 @@ function App() {
   const [defaultZoneSize, setDefaultZoneSize] = useState(DEFAULT_ZONE_SIZE_CM);
   const [backgroundUrl, setBackgroundUrl] = useState(null);
   const [backgroundType, setBackgroundType] = useState('url'); // 'url' or 'upload'
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [unsplashApiKey, setUnsplashApiKey] = useState('');
   const stageRef = useRef(null);
 
   // Load project from localStorage on mount
@@ -118,6 +111,9 @@ function App() {
       if (savedProject.projectName) {
         setProjectName(savedProject.projectName);
       }
+      if (savedProject.unsplashApiKey) {
+        setUnsplashApiKey(savedProject.unsplashApiKey);
+      }
     }
 
     // Set loading to false after loading is complete
@@ -143,12 +139,13 @@ function App() {
       gridSize,
       projectName,
       defaultZoneSize,
+      unsplashApiKey,
       timestamp: Date.now()
     };
 
     saveProjectToLocalStorage(projectData);
     setLastSaved(Date.now());
-  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName, defaultZoneSize, backgroundUrl, backgroundType]);
+  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName, defaultZoneSize, backgroundUrl, backgroundType, unsplashApiKey]);
 
   // Create new project function
   const handleNewProject = () => {
@@ -169,6 +166,7 @@ function App() {
       setLastSaved(null);
       setProjectName(DEFAULT_PROJECT_NAME);
       setDefaultZoneSize(DEFAULT_ZONE_SIZE_CM);
+      setUnsplashApiKey('');
     }
   };
 
@@ -187,6 +185,7 @@ function App() {
       gridSize,
       projectName,
       defaultZoneSize,
+      unsplashApiKey,
       timestamp: Date.now(),
       version: '1.0'
     };
@@ -272,6 +271,9 @@ function App() {
           }
           if (projectData.backgroundType) {
             setBackgroundType(projectData.backgroundType);
+          }
+          if (projectData.unsplashApiKey !== undefined) {
+            setUnsplashApiKey(projectData.unsplashApiKey);
           }
           
           // Clear selection
@@ -369,6 +371,21 @@ function App() {
     setBackgroundAttrs(null); // Reset transform when image changes
   };
 
+  const handleOpenSearchModal = () => {
+    setIsSearchModalOpen(true);
+  };
+
+  const handleCloseSearchModal = () => {
+    setIsSearchModalOpen(false);
+  };
+
+  const handleImageSelect = (imageUrl) => {
+    setBackgroundUrl(imageUrl);
+    setBackgroundImage(imageUrl);
+    setBackgroundType('url');
+    setBackgroundAttrs(null);
+  };
+
   const handleAddZone = () => {
     // Convert zone size from cm to inches to pixels
     const widthInches = defaultZoneSize.width / 2.54;
@@ -415,6 +432,7 @@ function App() {
       <Sidebar
         onSetBackgroundUrl={handleSetBackgroundUrl}
         onSetBackgroundUpload={handleSetBackgroundUpload}
+        onOpenSearchModal={handleOpenSearchModal}
         onAddZone={handleAddZone}
         onExport={handleExport}
         onNewProject={handleNewProject}
@@ -439,6 +457,8 @@ function App() {
         defaultZoneSize={defaultZoneSize}
         onSetDefaultZoneSize={setDefaultZoneSize}
         backgroundType={backgroundType}
+        unsplashApiKey={unsplashApiKey}
+        onSetUnsplashApiKey={setUnsplashApiKey}
       />
       <DesignStage
         ref={stageRef}
@@ -469,6 +489,13 @@ function App() {
           unit={unit}
         />
       )}
+      
+      <ImageSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={handleCloseSearchModal}
+        onSelectImage={handleImageSelect}
+        unsplashApiKey={unsplashApiKey}
+      />
     </div>
   );
 }

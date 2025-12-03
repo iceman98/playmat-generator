@@ -3,7 +3,7 @@ import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save,
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize, backgroundType }) => {
+const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onOpenSearchModal, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize, backgroundType, unsplashApiKey, onSetUnsplashApiKey }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
     const [backgroundInputType, setBackgroundInputType] = useState(backgroundType || 'url'); // 'url' or 'upload'
@@ -152,6 +152,16 @@ const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onAddZone, onExpor
                                 <ImageIcon size={16} />
                             </button>
                         </form>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <button 
+                                className={styles.toolButton} 
+                                onClick={onOpenSearchModal}
+                                style={{ width: '100%', justifyContent: 'center' }}
+                            >
+                                <Search size={16} /> Search Images Online
+                            </button>
+                        </div>
 
                         <div style={{ marginBottom: '20px' }}>
                             <h4>Upload Image</h4>
@@ -360,6 +370,21 @@ const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onAddZone, onExpor
                                         className={styles.input}
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.settingGroup}>
+                            <label>Unsplash API Key</label>
+                            <input
+                                type="password"
+                                placeholder="Get your key at unsplash.com/developers"
+                                value={unsplashApiKey}
+                                onChange={(e) => onSetUnsplashApiKey(e.target.value)}
+                                className={styles.input}
+                                style={{ fontSize: '12px' }}
+                            />
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                Optional: For better image search results
                             </div>
                         </div>
                     </div>
