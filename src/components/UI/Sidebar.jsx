@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save } from 'lucide-react';
+import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save, Upload } from 'lucide-react';
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved }) => {
+const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
 
@@ -66,14 +66,36 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, matSize, 
             </div>
 
             <div className={styles.header}>
-                <button 
-                    className={styles.actionButton}
-                    onClick={onNewProject}
-                    title="Nuevo Proyecto"
-                >
-                    <FilePlus size={16} />
-                    Nuevo
-                </button>
+                <div className={styles.headerButtons}>
+                    <button 
+                        className={styles.actionButton}
+                        onClick={onNewProject}
+                        title="Nuevo Proyecto"
+                    >
+                        <FilePlus size={16} />
+                        Nuevo
+                    </button>
+                    
+                    <button 
+                        className={styles.actionButton}
+                        onClick={onDownloadProject}
+                        title="Descargar Proyecto"
+                    >
+                        <Download size={16} />
+                        Descargar
+                    </button>
+                    
+                    <label className={styles.actionButton} title="Subir Proyecto">
+                        <Upload size={16} />
+                        Subir
+                        <input
+                            type="file"
+                            accept=".json"
+                            onChange={onUploadProject}
+                            style={{ display: 'none' }}
+                        />
+                    </label>
+                </div>
                 
                 <div className={styles.saveStatus}>
                     <Save size={14} />

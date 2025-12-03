@@ -148,6 +148,96 @@ function App() {
     }
   };
 
+  // Download project as JSON
+  const handleDownloadProject = () => {
+    const projectData = {
+      backgroundImage,
+      backgroundAttrs: backgroundAttrs ? (({ rotation, ...rest }) => rest)(backgroundAttrs) : null,
+      zones,
+      matSize,
+      unit,
+      dpi,
+      gridEnabled,
+      gridSize,
+      timestamp: Date.now(),
+      version: '1.0'
+    };
+
+    const dataString = JSON.stringify(projectData, null, 2);
+    const blob = new Blob([dataString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `playmat-project-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Upload project from JSON file
+  const handleUploadProject = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const projectData = JSON.parse(e.target.result);
+        
+        // Validate project data structure
+        if (projectData && typeof projectData === 'object') {
+          // Restore all project state
+          if (projectData.backgroundImage !== undefined) {
+            setBackgroundImage(projectData.backgroundImage);
+          }
+          if (projectData.backgroundAttrs) {
+            const { rotation, ...cleanAttrs } = projectData.backgroundAttrs;
+            setBackgroundAttrs(cleanAttrs);
+          }
+          if (projectData.zones) {
+            setZones(projectData.zones);
+          }
+          if (projectData.matSize) {
+            setMatSize(projectData.matSize);
+          }
+          if (projectData.unit) {
+            setUnit(projectData.unit);
+          }
+          if (projectData.dpi) {
+            setDpi(projectData.dpi);
+          }
+          if (projectData.gridEnabled !== undefined) {
+            setGridEnabled(projectData.gridEnabled);
+          }
+          if (projectData.gridSize) {
+            setGridSize(projectData.gridSize);
+          }
+          
+          // Clear selection
+          selectShape(null);
+          
+          // Save to localStorage
+          saveProjectToLocalStorage(projectData);
+          setLastSaved(Date.now());
+          
+          alert('Proyecto cargado exitosamente');
+        } else {
+          alert('Formato de archivo inválido');
+        }
+      } catch (error) {
+        console.error('Error parsing project file:', error);
+        alert('Error al leer el archivo de proyecto');
+      }
+    };
+    
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+  };
+
   // Copy-paste keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -259,6 +349,8 @@ function App() {
         onAddZone={handleAddZone}
         onExport={handleExport}
         onNewProject={handleNewProject}
+        onDownloadProject={handleDownloadProject}
+        onUploadProject={handleUploadProject}
         matSize={matSize}
         onSetMatSize={setMatSize}
         unit={unit}

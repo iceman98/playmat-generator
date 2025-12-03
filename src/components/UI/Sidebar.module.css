@@ -380,27 +380,35 @@
 /* Header styles */
 .header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-color);
     background: rgba(0, 0, 0, 0.1);
     gap: 8px;
 }
 
+.headerButtons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 .actionButton {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 4px;
+    padding: 4px 8px;
     background: var(--accent-primary);
     color: white;
     border: none;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-base);
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
 }
 
 .actionButton:hover {
