@@ -378,31 +378,23 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
                     >
                         <optgroup label="Sans-Serif">
                             <option value="Arial" style={{fontFamily: 'Arial'}}>Arial</option>
-                            <option value="Helvetica" style={{fontFamily: 'Helvetica'}}>Helvetica</option>
                             <option value="Verdana" style={{fontFamily: 'Verdana'}}>Verdana</option>
                             <option value="Tahoma" style={{fontFamily: 'Tahoma'}}>Tahoma</option>
                             <option value="Trebuchet MS" style={{fontFamily: 'Trebuchet MS'}}>Trebuchet MS</option>
-                            <option value="Century Gothic" style={{fontFamily: 'Century Gothic'}}>Century Gothic</option>
-                            <option value="Gill Sans" style={{fontFamily: 'Gill Sans'}}>Gill Sans</option>
                         </optgroup>
                         
                         <optgroup label="Serif">
                             <option value="Times New Roman" style={{fontFamily: 'Times New Roman'}}>Times New Roman</option>
                             <option value="Georgia" style={{fontFamily: 'Georgia'}}>Georgia</option>
-                            <option value="Palatino" style={{fontFamily: 'Palatino'}}>Palatino</option>
-                            <option value="Rockwell" style={{fontFamily: 'Rockwell'}}>Rockwell</option>
                         </optgroup>
                         
                         <optgroup label="Display/Impact">
                             <option value="Impact" style={{fontFamily: 'Impact'}}>Impact</option>
                             <option value="Arial Black" style={{fontFamily: 'Arial Black'}}>Arial Black</option>
-                            <option value="Copperplate" style={{fontFamily: 'Copperplate'}}>Copperplate</option>
-                            <option value="Futura" style={{fontFamily: 'Futura'}}>Futura</option>
                         </optgroup>
                         
                         <optgroup label="Monospace/Code">
                             <option value="Courier New" style={{fontFamily: 'Courier New'}}>Courier New</option>
-                            <option value="Monaco" style={{fontFamily: 'Monaco'}}>Monaco</option>
                             <option value="Consolas" style={{fontFamily: 'Consolas'}}>Consolas</option>
                             <option value="Lucida Console" style={{fontFamily: 'Lucida Console'}}>Lucida Console</option>
                         </optgroup>
