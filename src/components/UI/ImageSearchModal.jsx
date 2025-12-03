@@ -49,7 +49,7 @@ const ImageSearchModal = ({ isOpen, onClose, onSelectImage, unsplashApiKey }) =>
 
     const handleAccept = () => {
         if (selectedImage) {
-            const imageUrl = selectedImage.urls?.regular || selectedImage;
+            const imageUrl = selectedImage.urls?.full || selectedImage;
             onSelectImage(imageUrl);
             handleClose();
         }
