@@ -59,6 +59,23 @@ const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onOpenSearchModal,
         'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2942&auto=format&fit=crop', // Gaming
         'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2868&auto=format&fit=crop', // Abstract
         'https://images.unsplash.com/photo-1582921017967-79d1cb6702ee?q=80&w=2670&auto=format&fit=crop', // Train
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop', // Mountains
+        'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=2070&auto=format&fit=crop', // Ocean
+        'https://images.unsplash.com/photo-1540206395-68808572332f?q=80&w=2670&auto=format&fit=crop', // Forest
+        'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop', // Desert
+        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2070&auto=format&fit=crop', // City
+        'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop', // Lake
+        'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2070&auto=format&fit=crop', // Nature
+        'https://images.unsplash.com/photo-1426604966848-d7adac402bff?q=80&w=2070&auto=format&fit=crop', // Space
+        'https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2070&auto=format&fit=crop', // Fantasy
+        'https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2070&auto=format&fit=crop', // Dragon
+        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=2070&auto=format&fit=crop', // Castle
+        'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2070&auto=format&fit=crop', // Magic
+        'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?q=80&w=2070&auto=format&fit=crop', // Fire
+        'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2070&auto=format&fit=crop', // Ice
+        'https://images.unsplash.com/photo-1515219108156-31c35e26a0d5?q=80&w=2070&auto=format&fit=crop', // Lightning
+        'https://images.unsplash.com/photo-1515694346937-94d85e41e3a1?q=80&w=2070&auto=format&fit=crop', // Tech
+        'https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
     ];
 
     return (
