@@ -20,7 +20,7 @@ import {
     EXPORT_DELAY_MS
 } from '../../constants';
 
-const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT }, ref) => {
+const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = 'Mi Proyecto' }, ref) => {
     const stageRef = useRef(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
@@ -75,7 +75,10 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                     stage.position(originalPosition);
 
                     const link = document.createElement('a');
-                    link.download = EXPORT_FILENAME;
+                    // Sanitize project name for filename
+                    const sanitizedName = projectName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s-]/g, '').trim();
+                    const filename = sanitizedName || 'playmat-design';
+                    link.download = `${filename}.png`;
                     link.href = uri;
                     document.body.appendChild(link);
                     link.click();

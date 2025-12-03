@@ -3,7 +3,7 @@ import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save,
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved }) => {
+const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
 
@@ -199,6 +199,17 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                 {activeTab === 'settings' && (
                     <div className={styles.panel}>
                         <h3>Settings</h3>
+
+                        <div className={styles.settingGroup}>
+                            <label>Nombre del Proyecto</label>
+                            <input
+                                type="text"
+                                value={projectName}
+                                onChange={(e) => onSetProjectName(e.target.value)}
+                                className={styles.input}
+                                placeholder="Mi Proyecto"
+                            />
+                        </div>
 
                         <div className={styles.settingGroup}>
                             <label>Export DPI (Resolution)</label>

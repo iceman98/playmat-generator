@@ -68,6 +68,7 @@ function App() {
   const [copiedZone, setCopiedZone] = useState(null);
   const [lastSaved, setLastSaved] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [projectName, setProjectName] = useState('Mi Proyecto');
   const stageRef = useRef(null);
 
   // Load project from localStorage on mount
@@ -102,6 +103,9 @@ function App() {
       if (savedProject.gridSize) {
         setGridSize(savedProject.gridSize);
       }
+      if (savedProject.projectName) {
+        setProjectName(savedProject.projectName);
+      }
     }
 
     // Set loading to false after loading is complete
@@ -123,12 +127,13 @@ function App() {
       dpi,
       gridEnabled,
       gridSize,
+      projectName,
       timestamp: Date.now()
     };
 
     saveProjectToLocalStorage(projectData);
     setLastSaved(Date.now());
-  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize]);
+  }, [backgroundImage, backgroundAttrs, zones, matSize, unit, dpi, gridEnabled, gridSize, projectName]);
 
   // Create new project function
   const handleNewProject = () => {
@@ -145,6 +150,7 @@ function App() {
       setGridSize(DEFAULT_GRID_SIZE);
       setCopiedZone(null);
       setLastSaved(null);
+      setProjectName('Mi Proyecto');
     }
   };
 
@@ -159,6 +165,7 @@ function App() {
       dpi,
       gridEnabled,
       gridSize,
+      projectName,
       timestamp: Date.now(),
       version: '1.0'
     };
@@ -167,9 +174,13 @@ function App() {
     const blob = new Blob([dataString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     
+    // Sanitize project name for filename
+    const sanitizedName = projectName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s-]/g, '').trim();
+    const filename = sanitizedName || 'playmat-project';
+    
     const link = document.createElement('a');
     link.href = url;
-    link.download = `playmat-project-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `${filename}-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -213,6 +224,9 @@ function App() {
           }
           if (projectData.gridSize) {
             setGridSize(projectData.gridSize);
+          }
+          if (projectData.projectName) {
+            setProjectName(projectData.projectName);
           }
           
           // Clear selection
@@ -365,6 +379,8 @@ function App() {
         selectedId={selectedId}
         onSelectZone={selectShape}
         lastSaved={lastSaved}
+        projectName={projectName}
+        onSetProjectName={setProjectName}
       />
       <DesignStage
         ref={stageRef}
@@ -380,6 +396,7 @@ function App() {
         gridEnabled={gridEnabled}
         gridSize={gridSize}
         unit={unit}
+        projectName={projectName}
       />
       {selectedId && (
         <PropertiesPanel
