@@ -97,9 +97,19 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                     </label>
                 </div>
                 
+                <div className={styles.projectNameContainer}>
+                    <input
+                        type="text"
+                        value={projectName}
+                        onChange={(e) => onSetProjectName(e.target.value)}
+                        className={styles.projectNameInput}
+                        placeholder="Project Name"
+                    />
+                </div>
+                
                 <div className={styles.saveStatus}>
                     <Save size={14} />
-                    {formatLastSaved(lastSaved) || 'Sin guardar'}
+                    {formatLastSaved(lastSaved) || 'Not saved'}
                 </div>
             </div>
 
@@ -199,17 +209,6 @@ const Sidebar = ({ onSetBackground, onAddZone, onExport, onNewProject, onDownloa
                 {activeTab === 'settings' && (
                     <div className={styles.panel}>
                         <h3>Settings</h3>
-
-                        <div className={styles.settingGroup}>
-                            <label>Nombre del Proyecto</label>
-                            <input
-                                type="text"
-                                value={projectName}
-                                onChange={(e) => onSetProjectName(e.target.value)}
-                                className={styles.input}
-                                placeholder="Mi Proyecto"
-                            />
-                        </div>
 
                         <div className={styles.settingGroup}>
                             <label>Export DPI (Resolution)</label>

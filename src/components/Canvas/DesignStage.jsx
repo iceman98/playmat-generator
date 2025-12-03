@@ -10,17 +10,17 @@ import {
     DEFAULT_GRID_ENABLED,
     DEFAULT_GRID_SIZE,
     DEFAULT_UNIT,
+    DEFAULT_PROJECT_NAME,
     SCREEN_DPI,
     DEFAULT_SHOW_BORDER,
     DEFAULT_SHOW_GRID,
     CANVAS_PADDING,
     ZOOM_SCALE_BY,
     UI_COLORS,
-    EXPORT_FILENAME,
     EXPORT_DELAY_MS
 } from '../../constants';
 
-const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = 'Mi Proyecto' }, ref) => {
+const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = DEFAULT_PROJECT_NAME }, ref) => {
     const stageRef = useRef(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);

@@ -10,6 +10,7 @@ import {
   DEFAULT_UNIT,
   DEFAULT_ZONE,
   DEFAULT_ZONE_SIZE_CM,
+  DEFAULT_PROJECT_NAME,
   SCREEN_DPI
 } from './constants';
 import './index.css';
@@ -68,7 +69,7 @@ function App() {
   const [copiedZone, setCopiedZone] = useState(null);
   const [lastSaved, setLastSaved] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [projectName, setProjectName] = useState('Mi Proyecto');
+  const [projectName, setProjectName] = useState(DEFAULT_PROJECT_NAME);
   const stageRef = useRef(null);
 
   // Load project from localStorage on mount
@@ -150,7 +151,7 @@ function App() {
       setGridSize(DEFAULT_GRID_SIZE);
       setCopiedZone(null);
       setLastSaved(null);
-      setProjectName('Mi Proyecto');
+      setProjectName(DEFAULT_PROJECT_NAME);
     }
   };
 

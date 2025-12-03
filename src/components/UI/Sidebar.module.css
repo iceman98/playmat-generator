@@ -393,6 +393,34 @@
     flex-wrap: wrap;
 }
 
+.projectNameContainer {
+    margin: 8px 0;
+}
+
+.projectNameInput {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all var(--transition-base);
+}
+
+.projectNameInput:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.projectNameInput::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
 .actionButton {
     display: flex;
     align-items: center;
