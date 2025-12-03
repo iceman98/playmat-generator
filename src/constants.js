@@ -39,6 +39,11 @@ export const CANVAS_PADDING = 40; // pixels
 export const ZOOM_SCALE_BY = 1.1;
 
 // ----------------------------------------------------------------------------
+// BACKGROUND SETTINGS
+// ----------------------------------------------------------------------------
+export const BACKGROUND_OPACITY = 0.3;
+
+// ----------------------------------------------------------------------------
 // ZONE DEFAULTS
 // ----------------------------------------------------------------------------
 // Default zone size in cm (will be converted to pixels based on display)

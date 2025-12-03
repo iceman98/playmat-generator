@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image as KonvaImage, Transformer } from 'react-konva';
+import { Image as KonvaImage, Transformer, Rect, Group } from 'react-konva';
 import useImage from 'use-image';
-import { TRANSFORMER_HANDLE_SIZE } from '../../../constants';
+import { TRANSFORMER_HANDLE_SIZE, BACKGROUND_OPACITY } from '../../../constants';
 
 const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSelected, onSelect, width, height, isPanning = false }) => {
     const [image] = useImage(imageUrl, 'anonymous');
-    const imageNodeRef = useRef(null);
+    const outsideImageRef = useRef(null);
+    const insideImageRef = useRef(null);
     const trRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStartedWithMiddleClick, setDragStartedWithMiddleClick] = useState(false);
@@ -46,26 +47,72 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
         // Don't select here - selection is handled in onMouseDown
     };
 
+    const handleTransform = (e) => {
+        // Synchronize the inside image in real-time during transform
+        if (insideImageRef.current && outsideImageRef.current) {
+            const currentAttrs = {
+                x: outsideImageRef.current.x(),
+                y: outsideImageRef.current.y(),
+                scaleX: outsideImageRef.current.scaleX(),
+                scaleY: outsideImageRef.current.scaleY(),
+            };
+            insideImageRef.current.setAttrs(currentAttrs);
+        }
+    };
+
+    const handleDragMove = (e) => {
+        // Synchronize the inside image in real-time during drag
+        if (insideImageRef.current && outsideImageRef.current) {
+            const currentAttrs = {
+                x: outsideImageRef.current.x(),
+                y: outsideImageRef.current.y(),
+                scaleX: outsideImageRef.current.scaleX(),
+                scaleY: outsideImageRef.current.scaleY(),
+            };
+            insideImageRef.current.setAttrs(currentAttrs);
+        }
+    };
+
     const handleDragEnd = (e) => {
         setIsDragging(false);
         setDragStartedWithMiddleClick(false);
 
-        onBackgroundChange({
+        const newAttrs = {
             ...backgroundAttrs,
             x: e.target.x(),
             y: e.target.y(),
-        });
+        };
+
+        onBackgroundChange(newAttrs);
+        
+        // Synchronize the inside image with the outside image
+        if (insideImageRef.current) {
+            insideImageRef.current.setAttrs(newAttrs);
+        }
     };
 
+    // Synchronize images during drag
     useEffect(() => {
-        if (isSelected && trRef.current && imageNodeRef.current) {
-            trRef.current.nodes([imageNodeRef.current]);
+        if (outsideImageRef.current && insideImageRef.current && backgroundAttrs) {
+            const currentAttrs = {
+                x: outsideImageRef.current.x(),
+                y: outsideImageRef.current.y(),
+                scaleX: outsideImageRef.current.scaleX(),
+                scaleY: outsideImageRef.current.scaleY(),
+            };
+            insideImageRef.current.setAttrs(currentAttrs);
+        }
+    }, [backgroundAttrs]);
+
+    useEffect(() => {
+        if (isSelected && trRef.current && outsideImageRef.current) {
+            trRef.current.nodes([outsideImageRef.current]);
             trRef.current.getLayer().batchDraw();
         }
     }, [isSelected]);
 
     useEffect(() => {
-        if (image && imageNodeRef.current) {
+        if (image && outsideImageRef.current && insideImageRef.current) {
             if (!backgroundAttrs) {
                 // Initial auto-fit
                 const scaleX = width / image.width;
@@ -81,14 +128,16 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
                     imageHeight: image.height,
                 };
 
-                // Apply initial attrs immediately
-                imageNodeRef.current.setAttrs(initialAttrs);
+                // Apply initial attrs to both images
+                outsideImageRef.current.setAttrs(initialAttrs);
+                insideImageRef.current.setAttrs(initialAttrs);
 
                 // Update parent state
                 onBackgroundChange(initialAttrs);
             } else {
-                // Apply existing attrs
-                imageNodeRef.current.setAttrs(backgroundAttrs);
+                // Apply existing attrs to both images
+                outsideImageRef.current.setAttrs(backgroundAttrs);
+                insideImageRef.current.setAttrs(backgroundAttrs);
             }
         }
     }, [image, width, height, backgroundAttrs, onBackgroundChange]);
@@ -97,34 +146,59 @@ const BackgroundLayer = ({ imageUrl, backgroundAttrs, onBackgroundChange, isSele
 
     return (
         <React.Fragment>
+            {/* Background image outside playmat - 50% opacity */}
             <KonvaImage
-                name="backgroundImage"
+                name="backgroundImageOutside"
                 image={image}
-                ref={imageNodeRef}
+                opacity={BACKGROUND_OPACITY}
+                ref={outsideImageRef}
                 draggable={!isPanning}
                 onClick={handleClick}
                 onTap={handleClick}
                 onMouseDown={handleMouseDown}
                 onDragStart={handleDragStart}
+                onDragMove={handleDragMove}
                 onDragEnd={handleDragEnd}
+                onTransform={handleTransform}
                 onTransformEnd={(e) => {
-                    const node = imageNodeRef.current;
+                    const node = outsideImageRef.current;
                     const scaleX = node.scaleX();
                     const scaleY = node.scaleY();
 
-                    // Reset scale to 1 and adjust width/height or keep scale?
-                    // For images, it's often better to keep scale to avoid quality loss if we were to bake it in.
-                    // But here we are just tracking transform.
-
-                    onBackgroundChange({
+                    const newAttrs = {
                         ...backgroundAttrs,
                         x: node.x(),
                         y: node.y(),
                         scaleX: scaleX,
                         scaleY: scaleY,
-                    });
+                    };
+
+                    onBackgroundChange(newAttrs);
+                    
+                    // Synchronize the inside image with the outside image
+                    if (insideImageRef.current) {
+                        insideImageRef.current.setAttrs(newAttrs);
+                    }
                 }}
             />
+            
+            {/* Background image inside playmat - 100% opacity with clip */}
+            <Group
+                clipFunc={(ctx) => {
+                    ctx.rect(0, 0, width, height);
+                }}
+                name="backgroundGroup"
+            >
+                <KonvaImage
+                    name="backgroundImageInside"
+                    image={image}
+                    opacity={1}
+                    ref={insideImageRef}
+                    draggable={false} // Disabled, handled by the outside image
+                    listening={false} // Disabled, handled by the outside image
+                />
+            </Group>
+            
             {isSelected && (
                 <Transformer
                     ref={trRef}
