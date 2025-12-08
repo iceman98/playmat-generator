@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Rect, Transformer, Group, Text, Image, Line, Path } from 'react-konva';
 import useImage from 'use-image';
 import {
@@ -9,10 +9,11 @@ import {
     TRANSFORMER_HANDLE_SIZE
 } from '../../../constants';
 
-const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false }) => {
+const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSelecting = false, onSelect, onChange, onBatchChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false, selectedIds = [], zones = [], tempPositions = {}, onTempPositionUpdate, clearTempPositions }) => {
     const shapeRef = useRef();
     const trRef = useRef();
     const [zoneImage] = useImage(shapeProps.zoneImage || '');
+    const [dragStartPos, setDragStartPos] = useState(null);
 
     // Snap to grid helper function
     const snapToGrid = (value) => {
@@ -25,19 +26,21 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
         return Math.round(value / gridSizePx) * gridSizePx;
     };
 
-    useEffect(() => {
-        if (isSelected) {
-            trRef.current.nodes([shapeRef.current]);
-            trRef.current.getLayer().batchDraw();
+    // Handle click with multi-selection support
+    const handleClick = (e) => {
+        // Don't change selection if this is part of a drag operation
+        if (e.type === 'dragstart' || e.dragStart) {
+            return;
         }
-    }, [isSelected]);
+        onSelect(shapeProps.id);
+    };
 
     useEffect(() => {
-        if (isSelected && trRef.current) {
+        if ((isSelected || isMultiSelected) && trRef.current && shapeRef.current) {
             trRef.current.nodes([shapeRef.current]);
             trRef.current.getLayer().batchDraw();
         }
-    }, [shapeProps]);
+    }, [isSelected, isMultiSelected, shapeProps]);
 
     useEffect(() => {
         if (shapeRef.current) {
@@ -55,23 +58,98 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
 
     const imageOpacity = shapeProps.imageOpacity !== undefined ? shapeProps.imageOpacity : 1;
 
+    // Get current position (use temp position if available during drag)
+    const currentX = tempPositions[shapeProps.id]?.x || shapeProps.x;
+    const currentY = tempPositions[shapeProps.id]?.y || shapeProps.y;
+
     return (
         <React.Fragment>
             <Group
                 draggable={!isPanning}
-                onClick={onSelect}
-                onTap={onSelect}
-                x={shapeProps.x}
-                y={shapeProps.y}
+                onClick={handleClick}
+                onTap={handleClick}
+                x={currentX}
+                y={currentY}
                 rotation={shapeProps.rotation || 0}
                 ref={shapeRef}
-                onDragStart={onSelect}
+                onDragStart={(e) => {
+                    // Store initial position for multi-selection drag
+                    if (isMultiSelected) {
+                        setDragStartPos({
+                            x: shapeProps.x,
+                            y: shapeProps.y
+                        });
+                    }
+                }}
+                onDragMove={(e) => {
+                    if (isMultiSelected && dragStartPos && selectedIds.length > 1) {
+                        // Calculate relative movement during drag
+                        const currentX = e.target.x();
+                        const currentY = e.target.y();
+                        const deltaX = currentX - dragStartPos.x;
+                        const deltaY = currentY - dragStartPos.y;
+                        
+                        // Update temporary positions for all selected zones
+                        selectedIds.forEach(id => {
+                            if (id !== shapeProps.id) {
+                                const otherZone = zones.find(z => z.id === id);
+                                if (otherZone && onTempPositionUpdate) {
+                                    onTempPositionUpdate(id, otherZone.x + deltaX, otherZone.y + deltaY);
+                                }
+                            }
+                        });
+                    }
+                }}
                 onDragEnd={(e) => {
-                    onChange({
-                        ...shapeProps,
-                        x: snapToGrid(e.target.x()),
-                        y: snapToGrid(e.target.y()),
-                    });
+                    const newX = snapToGrid(e.target.x());
+                    const newY = snapToGrid(e.target.y());
+                    
+                    if (isMultiSelected && dragStartPos && selectedIds.length > 1) {
+                        // Calculate relative movement
+                        const deltaX = newX - dragStartPos.x;
+                        const deltaY = newY - dragStartPos.y;
+                        
+                        // Prepare batch updates for all selected zones
+                        const updates = [];
+                        
+                        // Add update for dragged zone
+                        updates.push({
+                            ...shapeProps,
+                            x: newX,
+                            y: newY,
+                        });
+                        
+                        // Add updates for other selected zones
+                        selectedIds.forEach(id => {
+                            if (id !== shapeProps.id) {
+                                const otherZone = zones.find(z => z.id === id);
+                                if (otherZone) {
+                                    updates.push({
+                                        ...otherZone,
+                                        x: snapToGrid(otherZone.x + deltaX),
+                                        y: snapToGrid(otherZone.y + deltaY)
+                                    });
+                                }
+                            }
+                        });
+                        
+                        // Apply batch update
+                        if (onBatchChange) {
+                            onBatchChange(updates);
+                        } else {
+                            // Fallback to individual updates
+                            updates.forEach(update => onChange(update));
+                        }
+                    } else {
+                        // Single zone update
+                        onChange({
+                            ...shapeProps,
+                            x: newX,
+                            y: newY,
+                        });
+                    }
+                    
+                    setDragStartPos(null);
                 }}
                 onTransformEnd={(e) => {
                     const node = shapeRef.current;
@@ -90,6 +168,35 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
                     });
                 }}
             >
+                {/* Multi-selection indicator */}
+                {isMultiSelected && !isSelected && (
+                    <Rect
+                        x={-4}
+                        y={-4}
+                        width={shapeProps.width + 8}
+                        height={shapeProps.height + 8}
+                        stroke="#007acc"
+                        strokeWidth={2}
+                        strokeDasharray={[5, 5]}
+                        fill="transparent"
+                        listening={false}
+                    />
+                )}
+                
+                {/* Main selection indicator in multi-selection mode */}
+                {isMultiSelected && isSelected && (
+                    <Rect
+                        x={-2}
+                        y={-2}
+                        width={shapeProps.width + 4}
+                        height={shapeProps.height + 4}
+                        stroke="#ff6b00"
+                        strokeWidth={3}
+                        fill="transparent"
+                        listening={false}
+                    />
+                )}
+                
                 {/* Invisible Rect for accurate bounding box calculation */}
                 <Rect
                     name="bbox-rect"

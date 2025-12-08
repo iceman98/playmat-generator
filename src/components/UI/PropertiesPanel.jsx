@@ -3,7 +3,7 @@ import { X, Type, Box, Palette, Move, Maximize, Image as ImageIcon, ArrowLeftRig
 import CompactColorPicker from './CompactColorPicker';
 import styles from './PropertiesPanel.module.css';
 
-const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
+const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = [], onUpdateZone, onClose, onDeleteZone, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
     if (!selectedZone && !isBackground) return null;
 
     const dpi = 96;
@@ -22,7 +22,13 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
         try {
             if (isBackground) {
                 onUpdateBackground({ ...backgroundAttrs, [key]: value });
+            } else if (selectedIds.length > 1) {
+                // Apply to all selected zones
+                allSelectedZones.forEach(zone => {
+                    onUpdateZone({ ...zone, [key]: value });
+                });
             } else {
+                // Single zone
                 onUpdateZone({ ...selectedZone, [key]: value });
             }
         } catch (error) {
@@ -278,7 +284,15 @@ const PropertiesPanel = ({ selectedZone, onUpdateZone, onClose, onDeleteZone, is
         <div className={styles.panel}>
             <div className={styles.header}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3>Properties</h3>
+                    <div>
+                        <h3>Zone Properties</h3>
+                        {selectedIds.length > 1 && (
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                                {selectedIds.length} zones selected
+                                <span style={{ color: '#007acc', fontWeight: 'bold' }}> • Changes apply to all</span>
+                            </p>
+                        )}
+                    </div>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                         <X size={18} />
                     </button>

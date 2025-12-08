@@ -52,6 +52,9 @@ function App() {
   const [backgroundAttrs, setBackgroundAttrs] = useState(null);
   const [zones, setZones] = useState([]);
   const [selectedId, selectShape] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isMultiSelecting, setIsMultiSelecting] = useState(false);
+  const [tempPositions, setTempPositions] = useState({});
   const [matSize, setMatSize] = useState(DEFAULT_MAT_SIZE);
   const [unit, setUnit] = useState(DEFAULT_UNIT);
   const [dpi, setDpi] = useState(DEFAULT_EXPORT_DPI);
@@ -312,7 +315,7 @@ function App() {
       setBackgroundType('url');
       setBackgroundAttrs(null);
       setZones([]);
-      selectShape(null);
+      clearSelection();
       setMatSize(DEFAULT_MAT_SIZE);
       setUnit(DEFAULT_UNIT);
       setDpi(DEFAULT_EXPORT_DPI);
@@ -464,7 +467,11 @@ function App() {
 
       // Copy: Ctrl+C or Cmd+C
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-        if (selectedId && selectedId !== 'background') {
+        if (selectedIds.length > 0) {
+          const zonesToCopy = zones.filter(z => selectedIds.includes(z.id));
+          setCopiedZone(zonesToCopy);
+          e.preventDefault();
+        } else if (selectedId && selectedId !== 'background') {
           const zoneToCopy = zones.find(z => z.id === selectedId);
           if (zoneToCopy) {
             setCopiedZone(zoneToCopy);
@@ -481,14 +488,30 @@ function App() {
           const gridSizePx = gridSizeInches * SCREEN_DPI;
           const offset = gridEnabled ? gridSizePx : 20;
 
-          const newZone = {
-            ...copiedZone,
-            id: `zone-${Date.now()}`,
-            x: copiedZone.x + offset,
-            y: copiedZone.y + offset,
-          };
-          setZones([...zones, newZone]);
-          selectShape(newZone.id);
+          if (Array.isArray(copiedZone)) {
+            // Multiple zones copied
+            const newZones = copiedZone.map((zone, index) => ({
+              ...zone,
+              id: `zone-${Date.now()}-${index}`,
+              x: zone.x + offset,
+              y: zone.y + offset,
+            }));
+            setZones([...zones, ...newZones]);
+            // Select the newly pasted zones
+            const newIds = newZones.map(z => z.id);
+            setSelectedIds(newIds);
+            selectShape(newIds[0]);
+          } else {
+            // Single zone copied
+            const newZone = {
+              ...copiedZone,
+              id: `zone-${Date.now()}`,
+              x: copiedZone.x + offset,
+              y: copiedZone.y + offset,
+            };
+            setZones([...zones, newZone]);
+            selectShape(newZone.id);
+          }
           // Save to history after state update
           setTimeout(() => saveStateToHistory(), 0);
           e.preventDefault();
@@ -572,6 +595,60 @@ function App() {
     setTimeout(() => saveStateToHistory(), 0);
   };
 
+  // Multi-selection handler
+  const handleSelectShape = (id) => {
+    const isCtrlPressed = isMultiSelecting;
+    
+    if (isCtrlPressed && id !== 'background') {
+      // Toggle selection for multi-select
+      setSelectedIds(prev => {
+        // Only update if the selection would actually change
+        const alreadySelected = prev.includes(id);
+        if (alreadySelected) {
+          return prev.filter(selectedId => selectedId !== id);
+        } else {
+          return [...prev, id];
+        }
+      });
+      // Set selectedId to the most recently selected
+      selectShape(id);
+    } else {
+      // Single selection
+      setSelectedIds(id === 'background' ? [] : [id]);
+      selectShape(id);
+    }
+  };
+
+  // Clear all selections
+  const clearSelection = () => {
+    setSelectedIds([]);
+    selectShape(null);
+  };
+
+  // Track Ctrl/Cmd key state
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        setIsMultiSelecting(true);
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      // Only clear multi-select if neither Ctrl nor Meta is pressed
+      if (!e.ctrlKey && !e.metaKey) {
+        setIsMultiSelecting(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   const handleAddZone = () => {
     // Convert zone size from cm to inches to pixels
     const widthInches = defaultZoneSize.width / 2.54;
@@ -593,15 +670,59 @@ function App() {
   };
 
   const handleZoneChange = (newAttrs) => {
-    const newZones = zones.map((zone) => {
-      if (zone.id === newAttrs.id) {
-        return newAttrs;
-      }
-      return zone;
-    });
-    setZones(newZones);
+    // Check if this is part of a multi-selection batch update
+    if (selectedIds.length > 1 && selectedIds.includes(newAttrs.id)) {
+      // Update all selected zones with the same property changes
+      const newZones = zones.map((zone) => {
+        if (selectedIds.includes(zone.id)) {
+          // Apply only the changed properties, excluding position only
+          const changedKeys = Object.keys(newAttrs).filter(key => 
+            key !== 'id' && key !== 'x' && key !== 'y'
+          );
+          const updatedZone = { ...zone };
+          changedKeys.forEach(key => {
+            updatedZone[key] = newAttrs[key];
+          });
+          return updatedZone;
+        }
+        return zone;
+      });
+      setZones(newZones);
+    } else {
+      // Single zone update
+      const newZones = zones.map((zone) => {
+        if (zone.id === newAttrs.id) {
+          return newAttrs;
+        }
+        return zone;
+      });
+      setZones(newZones);
+    }
     // Save to history after state update
     setTimeout(() => saveStateToHistory(), 0);
+  };
+
+  const handleBatchZoneChange = (updates) => {
+    // Update multiple zones at once
+    const newZones = zones.map((zone) => {
+      const update = updates.find(u => u.id === zone.id);
+      return update || zone;
+    });
+    setZones(newZones);
+    clearTempPositions(); // Clear temp positions after final update
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
+  };
+
+  const handleTempPositionUpdate = (zoneId, x, y) => {
+    setTempPositions(prev => ({
+      ...prev,
+      [zoneId]: { x, y }
+    }));
+  };
+
+  const clearTempPositions = () => {
+    setTempPositions({});
   };
 
   const handleExport = () => {
@@ -611,9 +732,16 @@ function App() {
   };
 
   const handleDeleteZone = () => {
-    if (selectedId && selectedId !== 'background') {
+    if (selectedIds.length > 0) {
+      setZones(zones.filter(z => !selectedIds.includes(z.id)));
+      clearSelection();
+      // Save to history after state update
+      setTimeout(() => saveStateToHistory(), 0);
+    } else if (selectedId && selectedId !== 'background') {
       setZones(zones.filter(z => z.id !== selectedId));
       selectShape(null);
+      // Save to history after state update
+      setTimeout(() => saveStateToHistory(), 0);
     }
   };
 
@@ -657,8 +785,14 @@ function App() {
         onBackgroundChange={handleBackgroundChange}
         zones={zones}
         selectedId={selectedId}
-        onSelect={selectShape}
+        selectedIds={selectedIds}
+        isMultiSelecting={isMultiSelecting}
+        onSelect={handleSelectShape}
         onChange={handleZoneChange}
+        onBatchChange={handleBatchZoneChange}
+        tempPositions={tempPositions}
+        onTempPositionUpdate={handleTempPositionUpdate}
+        clearTempPositions={clearTempPositions}
         matSize={matSize}
         dpi={dpi}
         gridEnabled={gridEnabled}
@@ -669,8 +803,10 @@ function App() {
       {selectedId && (
         <PropertiesPanel
           selectedZone={zones.find(z => z.id === selectedId)}
+          selectedIds={selectedIds}
+          allSelectedZones={selectedIds.map(id => zones.find(z => z.id === id)).filter(Boolean)}
           onUpdateZone={handleZoneChange}
-          onClose={() => selectShape(null)}
+          onClose={() => clearSelection()}
           onDeleteZone={handleDeleteZone}
           isBackground={selectedId === 'background'}
           backgroundAttrs={backgroundAttrs}

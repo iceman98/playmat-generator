@@ -20,7 +20,7 @@ import {
     EXPORT_DELAY_MS
 } from '../../constants';
 
-const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, onSelect, onChange, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = DEFAULT_PROJECT_NAME }, ref) => {
+const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, selectedIds = [], isMultiSelecting = false, onSelect, onChange, onBatchChange, tempPositions = {}, onTempPositionUpdate, clearTempPositions, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = DEFAULT_PROJECT_NAME }, ref) => {
     const stageRef = useRef(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
@@ -245,8 +245,16 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                             key={zone.id}
                             shapeProps={zone}
                             isSelected={zone.id === selectedId}
+                            isMultiSelected={selectedIds.includes(zone.id)}
+                            isMultiSelecting={isMultiSelecting}
+                            selectedIds={selectedIds}
+                            zones={zones}
+                            tempPositions={tempPositions}
+                            onTempPositionUpdate={onTempPositionUpdate}
+                            clearTempPositions={clearTempPositions}
                             onSelect={() => onSelect(zone.id)}
                             onChange={onChange}
+                            onBatchChange={onBatchChange}
                             gridEnabled={gridEnabled}
                             gridSize={gridSize}
                             unit={unit}
