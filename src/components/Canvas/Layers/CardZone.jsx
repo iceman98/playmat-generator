@@ -33,6 +33,13 @@ const CardZone = ({ shapeProps, isSelected, onSelect, onChange, gridEnabled = DE
     }, [isSelected]);
 
     useEffect(() => {
+        if (isSelected && trRef.current) {
+            trRef.current.nodes([shapeRef.current]);
+            trRef.current.getLayer().batchDraw();
+        }
+    }, [shapeProps]);
+
+    useEffect(() => {
         if (shapeRef.current) {
             // Override getClientRect to force selection box to match zone dimensions exactly
             // ignoring overflowing text or images
