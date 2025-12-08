@@ -78,7 +78,6 @@ function App() {
   const saveStateToHistory = () => {
     if (isUndoing) return;
     
-    console.log('Saving state to history, current historyIndex:', historyIndex);
     const currentState = {
       backgroundImage: backgroundType === 'upload' ? backgroundImage : null,
       backgroundAttrs: backgroundAttrs ? (({ rotation, ...rest }) => rest)(backgroundAttrs) : null,
@@ -94,30 +93,25 @@ function App() {
       defaultZoneSize,
       unsplashApiKey,
     };
-    console.log('State to save:', currentState);
 
     setHistory(prev => {
       const newHistory = prev.slice(0, historyIndex + 1);
       newHistory.push(currentState);
       // Keep only last 50 states to prevent memory issues
       const result = newHistory.slice(-50);
-      console.log('New history length:', result.length);
       return result;
     });
     setHistoryIndex(prev => {
       const newIndex = Math.min(prev + 1, 49);
-      console.log('New history index:', newIndex);
       return newIndex;
     });
   };
 
   // Undo function
   const handleUndo = () => {
-    console.log('Undo called, historyIndex:', historyIndex, 'history length:', history.length);
     if (historyIndex > 0) {
       setIsUndoing(true);
       const prevState = history[historyIndex - 1];
-      console.log('Undoing to state:', prevState);
       
       // Restore state
       if (prevState.backgroundType === 'upload' && prevState.backgroundImage) {
@@ -147,8 +141,6 @@ function App() {
       setHistoryIndex(prev => prev - 1);
       
       setTimeout(() => setIsUndoing(false), 0);
-    } else {
-      console.log('Cannot undo - at beginning of history');
     }
   };
 
@@ -308,7 +300,7 @@ function App() {
 
   // Create new project function
   const handleNewProject = () => {
-    if (window.confirm('¿Crear un nuevo proyecto? El proyecto actual se perderá si no se ha guardado.')) {
+    if (window.confirm('Create a new project? The current project will be lost if not saved.')) {
       clearProjectFromLocalStorage();
       setBackgroundImage(null);
       setBackgroundUrl(null);
@@ -326,6 +318,11 @@ function App() {
       setProjectName(DEFAULT_PROJECT_NAME);
       setDefaultZoneSize(DEFAULT_ZONE_SIZE_CM);
       setUnsplashApiKey('');
+      // Clear history
+      setHistory([]);
+      setHistoryIndex(-1);
+      // Save to history after state update
+      setTimeout(() => saveStateToHistory(), 0);
     }
   };
 
