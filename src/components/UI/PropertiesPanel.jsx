@@ -338,6 +338,34 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
             </div>
 
             <div className={styles.section}>
+                <h4><Move size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Position ({unit})</h4>
+                <div className={styles.row}>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Left (X)</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            className={styles.input}
+                            value={Math.round(toUnit(selectedZone.x) * 100) / 100}
+                            onChange={(e) => handleChange('x', fromUnit(Number(e.target.value)))}
+                            onFocus={handleFocus}
+                        />
+                    </div>
+                    <div className={`${styles.controlGroup} ${styles.col}`}>
+                        <label>Top (Y)</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            className={styles.input}
+                            value={Math.round(toUnit(selectedZone.y) * 100) / 100}
+                            onChange={(e) => handleChange('y', fromUnit(Number(e.target.value)))}
+                            onFocus={handleFocus}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.section}>
                 <h4><Type size={14} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Text</h4>
 
                 <div className={styles.controlGroup}>

@@ -550,6 +550,92 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedId, zones]);
 
+  // Arrow key movement for zones and background
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger arrow key movement when typing in inputs
+      const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+      if (isTyping) return;
+
+      // Only handle arrow keys
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+
+      // Only move if something is selected
+      if (!selectedId) return;
+
+      e.preventDefault();
+
+      // Determine movement distance
+      const gridSizeInches = gridSize / 2.54;
+      const gridSizePx = gridSizeInches * SCREEN_DPI;
+      const moveDistance = gridEnabled ? gridSizePx : 10; // 10px if grid disabled
+
+      let dx = 0, dy = 0;
+      switch (e.key) {
+        case 'ArrowUp':
+          dy = -moveDistance;
+          break;
+        case 'ArrowDown':
+          dy = moveDistance;
+          break;
+        case 'ArrowLeft':
+          dx = -moveDistance;
+          break;
+        case 'ArrowRight':
+          dx = moveDistance;
+          break;
+      }
+
+      if (selectedId === 'background') {
+        // Move background
+        if (backgroundAttrs) {
+          const newAttrs = {
+            ...backgroundAttrs,
+            x: (backgroundAttrs.x || 0) + dx,
+            y: (backgroundAttrs.y || 0) + dy,
+          };
+          setBackgroundAttrs(newAttrs);
+          // Save to history after state update
+          setTimeout(() => saveStateToHistory(), 0);
+        }
+      } else {
+        // Move selected zone(s)
+        if (selectedIds.length > 1) {
+          // Multi-select: move all selected zones
+          const updatedZones = zones.map(zone => {
+            if (selectedIds.includes(zone.id)) {
+              return {
+                ...zone,
+                x: zone.x + dx,
+                y: zone.y + dy,
+              };
+            }
+            return zone;
+          });
+          setZones(updatedZones);
+        } else {
+          // Single zone movement
+          const updatedZones = zones.map(zone => {
+            if (zone.id === selectedId) {
+              return {
+                ...zone,
+                x: zone.x + dx,
+                y: zone.y + dy,
+              };
+            }
+            return zone;
+          });
+          setZones(updatedZones);
+        }
+        // Save to history after state update
+        setTimeout(() => saveStateToHistory(), 0);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, selectedIds, zones, backgroundAttrs, gridEnabled, gridSize]);
+
 
   const handleSetBackgroundUrl = (url) => {
     setBackgroundUrl(url);
