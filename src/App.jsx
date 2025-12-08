@@ -667,8 +667,13 @@ function App() {
   };
 
   const handleZoneChange = (newAttrs) => {
-    // Check if this is part of a multi-selection batch update
-    if (selectedIds.length > 1 && selectedIds.includes(newAttrs.id)) {
+    // Check if this is a new zone (id doesn't exist) or an update
+    const existingZone = zones.find(z => z.id === newAttrs.id);
+    
+    if (!existingZone) {
+      // This is a new zone, add it to the zones array
+      setZones([...zones, newAttrs]);
+    } else if (selectedIds.length > 1 && selectedIds.includes(newAttrs.id)) {
       // Update all selected zones with the same property changes
       const newZones = zones.map((zone) => {
         if (selectedIds.includes(zone.id)) {

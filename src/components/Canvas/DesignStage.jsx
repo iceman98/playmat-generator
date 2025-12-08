@@ -17,7 +17,8 @@ import {
     CANVAS_PADDING,
     ZOOM_SCALE_BY,
     UI_COLORS,
-    EXPORT_DELAY_MS
+    EXPORT_DELAY_MS,
+    DRAG_DROP_ZONE_WIDTH
 } from '../../constants';
 
 const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, selectedIds = [], isMultiSelecting = false, onSelect, onChange, onBatchChange, tempPositions = {}, onTempPositionUpdate, clearTempPositions, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = DEFAULT_PROJECT_NAME }, ref) => {
@@ -29,7 +30,76 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
     const [showGrid, setShowGrid] = useState(DEFAULT_SHOW_GRID);
     const [isPanning, setIsPanning] = useState(false);
 
-    // Mat dimensions: convert from internal cm storage to inches for pixel calculation
+    // Handle image drop to create zone
+    const handleDrop = (e) => {
+        e.preventDefault();
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    
+                    // Fixed width of 300px, height based on aspect ratio
+                    const zoneWidth = DRAG_DROP_ZONE_WIDTH;
+                    const imageAspectRatio = img.width / img.height;
+                    const zoneHeight = zoneWidth / imageAspectRatio;
+                    
+                    // Convert to pixels for positioning (using playmat DPI)
+                    const zoneWidthPx = zoneWidth;
+                    const zoneHeightPx = zoneHeight;
+                    
+                    // Get drop position relative to stage
+                    const stage = stageRef.current;
+                    const stageRect = stage.content.getBoundingClientRect();
+                    const dropX = (e.clientX - stageRect.left - position.x) / scale;
+                    const dropY = (e.clientY - stageRect.top - position.y) / scale;
+                    
+                    // Center the zone on drop position
+                    const zoneX = dropX - (zoneWidthPx / 2);
+                    const zoneY = dropY - (zoneHeightPx / 2);
+                    
+                    // Create new zone with image
+                    const newZone = {
+                        id: `zone-${Date.now()}`,
+                        x: zoneX,
+                        y: zoneY,
+                        width: zoneWidth,
+                        height: zoneHeight,
+                        fill: 'transparent',
+                        stroke: 'transparent',
+                        strokeWidth: 0,
+                        cornerRadius: 0,
+                        text: '',
+                        fontSize: 16,
+                        fontFamily: 'Arial',
+                        fontStyle: 'normal',
+                        textColor: '#000000',
+                        zoneImage: event.target.result,
+                        imageOpacity: 1,
+                        visibleBorders: {
+                            top: false,
+                            right: false,
+                            bottom: false,
+                            left: false
+                        },
+                        rotation: 0
+                    };
+                    
+                    if (onChange) {
+                        onChange(newZone);
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
     const matWidthInches = matSize.width / 2.54;
     const matHeightInches = matSize.height / 2.54;
 
@@ -185,7 +255,12 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
     };
 
     return (
-        <div id="canvas-container" className={styles.container}>
+        <div 
+            id="canvas-container" 
+            className={styles.container}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+        >
             <Stage
                 width={stageSize.width}
                 height={stageSize.height}
@@ -194,6 +269,8 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onTouchStart={handleMouseDown}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
                 scaleX={scale}
                 scaleY={scale}
                 x={position.x}

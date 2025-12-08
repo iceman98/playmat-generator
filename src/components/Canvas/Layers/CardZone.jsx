@@ -47,7 +47,7 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
             // Override getClientRect to force selection box to match zone dimensions exactly
             // ignoring overflowing text or images
             shapeRef.current.getClientRect = (config) => {
-                const bboxRect = shapeRef.current.findOne('.bbox-rect');
+                const bboxRect = shapeRef.current?.findOne('.bbox-rect');
                 if (bboxRect) {
                     return bboxRect.getClientRect(config);
                 }

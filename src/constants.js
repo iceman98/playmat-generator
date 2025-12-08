@@ -29,6 +29,9 @@ export const AVAILABLE_DPI_OPTIONS = [150, 300, 600, 1200];
 export const DEFAULT_GRID_ENABLED = true;
 export const DEFAULT_GRID_SIZE = 1; // cm (0.5 inches)
 export const DEFAULT_UNIT = 'cm'; // 'inch' or 'cm' - display unit only
+export const DEFAULT_ZONE_SIZE_CM = { width: 6.3, height: 8.8 };
+export const DEFAULT_ZONE_SIZE_IN = { width: 2.5, height: 3.5 };
+export const DRAG_DROP_ZONE_WIDTH = 300; // 'cm' - display unit only
 
 // ----------------------------------------------------------------------------
 // CANVAS SETTINGS
@@ -46,12 +49,6 @@ export const BACKGROUND_OPACITY = 0.3;
 // ----------------------------------------------------------------------------
 // ZONE DEFAULTS
 // ----------------------------------------------------------------------------
-// Default zone size in cm (will be converted to pixels based on display)
-export const DEFAULT_ZONE_SIZE_CM = {
-    width: 6.3,   // cm 
-    height: 8.8, // cm - roughly card-sized
-};
-
 export const DEFAULT_ZONE = {
     // width and height will be set dynamically based on unit
     fill: '#ffffff4d', // rgba(255, 255, 255, 0.3) as hex with alpha
