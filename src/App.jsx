@@ -539,7 +539,7 @@ function App() {
       // Don't delete if user is typing in an input or textarea
       const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
 
-      if (e.key === 'Delete' && selectedId && selectedId !== 'background' && !isTyping) {
+      if ((e.key === 'Delete' || (e.metaKey && e.key === 'Backspace')) && selectedId && selectedId !== 'background' && !isTyping) {
         e.preventDefault();
         setZones(zones.filter(z => z.id !== selectedId));
         selectShape(null);
