@@ -627,15 +627,15 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                             </div>
                         </div>
                         <div className={styles.controlGroup}>
-                            <label>Image Opacity: {selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1}</label>
+                            <label>Image Opacity: {Math.round((selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1) * 100)}%</label>
                             <input
                                 type="range"
                                 min="0"
-                                max="1"
-                                step="0.1"
+                                max="100"
+                                step="1"
                                 className={styles.slider}
-                                value={selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1}
-                                onChange={(e) => handleChange('imageOpacity', Number(e.target.value))}
+                                value={Math.round((selectedZone.imageOpacity !== undefined ? selectedZone.imageOpacity : 1) * 100)}
+                                onChange={(e) => handleChange('imageOpacity', Number(e.target.value) / 100)}
                             />
                         </div>
                         <button

@@ -622,19 +622,19 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                   <input
                     type="range"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value={rgb.a}
-                    onChange={(e) => handleRgbChange('a', parseFloat(e.target.value))}
+                    max="100"
+                    step="1"
+                    value={Math.round(rgb.a * 100)}
+                    onChange={(e) => handleRgbChange('a', parseInt(e.target.value) / 100)}
                     style={{ flex: 1, height: '6px' }}
                   />
                   <input
                     type="number"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value={rgb.a}
-                    onChange={(e) => handleRgbChange('a', parseFloat(e.target.value) || 0)}
+                    max="100"
+                    step="1"
+                    value={Math.round(rgb.a * 100)}
+                    onChange={(e) => handleRgbChange('a', (parseInt(e.target.value) || 0) / 100)}
                     style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
@@ -705,19 +705,19 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                   <input
                     type="range"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value={hsl.a}
-                    onChange={(e) => handleHslChange('a', parseFloat(e.target.value))}
+                    max="100"
+                    step="1"
+                    value={Math.round(hsl.a * 100)}
+                    onChange={(e) => handleHslChange('a', parseInt(e.target.value) / 100)}
                     style={{ flex: 1, height: '6px' }}
                   />
                   <input
                     type="number"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value={hsl.a}
-                    onChange={(e) => handleHslChange('a', parseFloat(e.target.value) || 0)}
+                    max="100"
+                    step="1"
+                    value={Math.round(hsl.a * 100)}
+                    onChange={(e) => handleHslChange('a', (parseInt(e.target.value) || 0) / 100)}
                     style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
@@ -767,19 +767,19 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
                   <input
                     type="range"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value={rgb.a}
-                    onChange={(e) => handleRgbChange('a', parseFloat(e.target.value))}
+                    max="100"
+                    step="1"
+                    value={Math.round(rgb.a * 100)}
+                    onChange={(e) => handleRgbChange('a', parseInt(e.target.value) / 100)}
                     style={{ flex: 1, height: '6px' }}
                   />
                   <input
                     type="number"
                     min="0"
-                    max="1"
-                    step="0.01"
-                    value={rgb.a}
-                    onChange={(e) => handleRgbChange('a', parseFloat(e.target.value) || 0)}
+                    max="100"
+                    step="1"
+                    value={Math.round(rgb.a * 100)}
+                    onChange={(e) => handleRgbChange('a', (parseInt(e.target.value) || 0) / 100)}
                     style={{ width: '60px', padding: '4px 8px', border: '2px solid #555', borderRadius: '6px', fontSize: '14px', backgroundColor: '#3a3a3a', color: '#fff' }}
                   />
                 </div>
