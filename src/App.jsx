@@ -66,7 +66,125 @@ function App() {
   const [backgroundType, setBackgroundType] = useState('url'); // 'url' or 'upload'
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [unsplashApiKey, setUnsplashApiKey] = useState('');
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isUndoing, setIsUndoing] = useState(false);
   const stageRef = useRef(null);
+
+  // Save current state to history
+  const saveStateToHistory = () => {
+    if (isUndoing) return;
+    
+    console.log('Saving state to history, current historyIndex:', historyIndex);
+    const currentState = {
+      backgroundImage: backgroundType === 'upload' ? backgroundImage : null,
+      backgroundAttrs: backgroundAttrs ? (({ rotation, ...rest }) => rest)(backgroundAttrs) : null,
+      backgroundUrl: backgroundType === 'url' ? backgroundUrl : null,
+      backgroundType: backgroundType,
+      zones: [...zones],
+      matSize,
+      unit,
+      dpi,
+      gridEnabled,
+      gridSize,
+      projectName,
+      defaultZoneSize,
+      unsplashApiKey,
+    };
+    console.log('State to save:', currentState);
+
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push(currentState);
+      // Keep only last 50 states to prevent memory issues
+      const result = newHistory.slice(-50);
+      console.log('New history length:', result.length);
+      return result;
+    });
+    setHistoryIndex(prev => {
+      const newIndex = Math.min(prev + 1, 49);
+      console.log('New history index:', newIndex);
+      return newIndex;
+    });
+  };
+
+  // Undo function
+  const handleUndo = () => {
+    console.log('Undo called, historyIndex:', historyIndex, 'history length:', history.length);
+    if (historyIndex > 0) {
+      setIsUndoing(true);
+      const prevState = history[historyIndex - 1];
+      console.log('Undoing to state:', prevState);
+      
+      // Restore state
+      if (prevState.backgroundType === 'upload' && prevState.backgroundImage) {
+        setBackgroundImage(prevState.backgroundImage);
+        setBackgroundUrl(null);
+        setBackgroundType('upload');
+      } else if (prevState.backgroundType === 'url' && prevState.backgroundUrl) {
+        setBackgroundUrl(prevState.backgroundUrl);
+        setBackgroundImage(prevState.backgroundUrl);
+        setBackgroundType('url');
+      } else {
+        setBackgroundImage(null);
+        setBackgroundUrl(null);
+        setBackgroundType('url');
+      }
+      
+      setBackgroundAttrs(prevState.backgroundAttrs);
+      setZones(prevState.zones);
+      setMatSize(prevState.matSize);
+      setUnit(prevState.unit);
+      setDpi(prevState.dpi);
+      setGridEnabled(prevState.gridEnabled);
+      setGridSize(prevState.gridSize);
+      setProjectName(prevState.projectName);
+      setDefaultZoneSize(prevState.defaultZoneSize);
+      setUnsplashApiKey(prevState.unsplashApiKey);
+      setHistoryIndex(prev => prev - 1);
+      
+      setTimeout(() => setIsUndoing(false), 0);
+    } else {
+      console.log('Cannot undo - at beginning of history');
+    }
+  };
+
+  // Redo function
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      setIsUndoing(true);
+      const nextState = history[historyIndex + 1];
+      
+      // Restore state
+      if (nextState.backgroundType === 'upload' && nextState.backgroundImage) {
+        setBackgroundImage(nextState.backgroundImage);
+        setBackgroundUrl(null);
+        setBackgroundType('upload');
+      } else if (nextState.backgroundType === 'url' && nextState.backgroundUrl) {
+        setBackgroundUrl(nextState.backgroundUrl);
+        setBackgroundImage(nextState.backgroundUrl);
+        setBackgroundType('url');
+      } else {
+        setBackgroundImage(null);
+        setBackgroundUrl(null);
+        setBackgroundType('url');
+      }
+      
+      setBackgroundAttrs(nextState.backgroundAttrs);
+      setZones(nextState.zones);
+      setMatSize(nextState.matSize);
+      setUnit(nextState.unit);
+      setDpi(nextState.dpi);
+      setGridEnabled(nextState.gridEnabled);
+      setGridSize(nextState.gridSize);
+      setProjectName(nextState.projectName);
+      setDefaultZoneSize(nextState.defaultZoneSize);
+      setUnsplashApiKey(nextState.unsplashApiKey);
+      setHistoryIndex(prev => prev + 1);
+      
+      setTimeout(() => setIsUndoing(false), 0);
+    }
+  };
 
   // Load project from localStorage on mount
   useEffect(() => {
@@ -114,6 +232,44 @@ function App() {
       if (savedProject.unsplashApiKey) {
         setUnsplashApiKey(savedProject.unsplashApiKey);
       }
+      
+      // Initialize history with loaded state
+      const initialState = {
+        backgroundImage: savedProject.backgroundType === 'upload' ? savedProject.backgroundImage : null,
+        backgroundAttrs: savedProject.backgroundAttrs ? (({ rotation, ...rest }) => rest)(savedProject.backgroundAttrs) : null,
+        backgroundUrl: savedProject.backgroundType === 'url' ? savedProject.backgroundUrl : null,
+        backgroundType: savedProject.backgroundType || 'url',
+        zones: savedProject.zones || [],
+        matSize: savedProject.matSize || DEFAULT_MAT_SIZE,
+        unit: savedProject.unit || DEFAULT_UNIT,
+        dpi: savedProject.dpi || DEFAULT_EXPORT_DPI,
+        gridEnabled: savedProject.gridEnabled !== undefined ? savedProject.gridEnabled : DEFAULT_GRID_ENABLED,
+        gridSize: savedProject.gridSize || DEFAULT_GRID_SIZE,
+        projectName: savedProject.projectName || DEFAULT_PROJECT_NAME,
+        defaultZoneSize: savedProject.defaultZoneSize || DEFAULT_ZONE_SIZE_CM,
+        unsplashApiKey: savedProject.unsplashApiKey || '',
+      };
+      setHistory([initialState]);
+      setHistoryIndex(0);
+    } else {
+      // Initialize history with default state
+      const initialState = {
+        backgroundImage: null,
+        backgroundAttrs: null,
+        backgroundUrl: null,
+        backgroundType: 'url',
+        zones: [],
+        matSize: DEFAULT_MAT_SIZE,
+        unit: DEFAULT_UNIT,
+        dpi: DEFAULT_EXPORT_DPI,
+        gridEnabled: DEFAULT_GRID_ENABLED,
+        gridSize: DEFAULT_GRID_SIZE,
+        projectName: DEFAULT_PROJECT_NAME,
+        defaultZoneSize: DEFAULT_ZONE_SIZE_CM,
+        unsplashApiKey: '',
+      };
+      setHistory([initialState]);
+      setHistoryIndex(0);
     }
 
     // Set loading to false after loading is complete
@@ -299,9 +455,13 @@ function App() {
     event.target.value = '';
   };
 
-  // Copy-paste keyboard shortcuts
+  // Copy-paste and undo/redo keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Don't trigger shortcuts when typing in inputs
+      const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+      if (isTyping) return;
+
       // Copy: Ctrl+C or Cmd+C
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         if (selectedId && selectedId !== 'background') {
@@ -329,14 +489,28 @@ function App() {
           };
           setZones([...zones, newZone]);
           selectShape(newZone.id);
+          // Save to history after state update
+          setTimeout(() => saveStateToHistory(), 0);
           e.preventDefault();
         }
+      }
+
+      // Undo: Ctrl+Z or Cmd+Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        handleUndo();
+        e.preventDefault();
+      }
+
+      // Redo: Ctrl+Y or Cmd+Y (or Ctrl+Shift+Z / Cmd+Shift+Z)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        handleRedo();
+        e.preventDefault();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, zones, copiedZone, gridEnabled, gridSize]);
+  }, [selectedId, zones, copiedZone, gridEnabled, gridSize, historyIndex, history]);
 
 
   // Delete zone with Delete key only (but not when typing in inputs)
@@ -362,6 +536,8 @@ function App() {
     setBackgroundImage(url); // Set the URL as the image source
     setBackgroundType('url');
     setBackgroundAttrs(null); // Reset transform when image changes
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
   };
 
   const handleSetBackgroundUpload = (base64Data) => {
@@ -369,6 +545,8 @@ function App() {
     setBackgroundUrl(null);
     setBackgroundType('upload');
     setBackgroundAttrs(null); // Reset transform when image changes
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
   };
 
   const handleOpenSearchModal = () => {
@@ -384,6 +562,14 @@ function App() {
     setBackgroundImage(imageUrl);
     setBackgroundType('url');
     setBackgroundAttrs(null);
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
+  };
+
+  const handleBackgroundChange = (newAttrs) => {
+    setBackgroundAttrs(newAttrs);
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
   };
 
   const handleAddZone = () => {
@@ -402,6 +588,8 @@ function App() {
       height: heightPx,
     };
     setZones([...zones, newZone]);
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
   };
 
   const handleZoneChange = (newAttrs) => {
@@ -412,6 +600,8 @@ function App() {
       return zone;
     });
     setZones(newZones);
+    // Save to history after state update
+    setTimeout(() => saveStateToHistory(), 0);
   };
 
   const handleExport = () => {
@@ -464,7 +654,7 @@ function App() {
         ref={stageRef}
         backgroundImage={backgroundImage}
         backgroundAttrs={backgroundAttrs}
-        onBackgroundChange={setBackgroundAttrs}
+        onBackgroundChange={handleBackgroundChange}
         zones={zones}
         selectedId={selectedId}
         onSelect={selectShape}
@@ -484,7 +674,7 @@ function App() {
           onDeleteZone={handleDeleteZone}
           isBackground={selectedId === 'background'}
           backgroundAttrs={backgroundAttrs}
-          onUpdateBackground={setBackgroundAttrs}
+          onUpdateBackground={handleBackgroundChange}
           matSize={matSize}
           unit={unit}
         />
