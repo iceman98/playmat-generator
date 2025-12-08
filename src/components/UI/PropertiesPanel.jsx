@@ -3,10 +3,11 @@ import { X, Type, Box, Palette, Move, Maximize, Image as ImageIcon, ArrowLeftRig
 import CompactColorPicker from './CompactColorPicker';
 import styles from './PropertiesPanel.module.css';
 
-const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = [], onUpdateZone, onClose, onDeleteZone, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch' }) => {
+const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = [], onUpdateZone, onClose, onDeleteZone, isBackground, backgroundAttrs, onUpdateBackground, matSize, unit = 'inch', isShiftPressed = false }) => {
     if (!selectedZone && !isBackground) return null;
 
     const dpi = 96;
+    const gridSize = 1; // Default grid size in cm - this should match the actual grid size from props
 
     const toUnit = (px) => {
         if (unit === 'inch') return px / dpi;
@@ -16,6 +17,17 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
     const fromUnit = (val) => {
         if (unit === 'inch') return val * dpi;
         return (val / 2.54) * dpi;
+    };
+
+    // Snap to grid helper function for position inputs
+    const snapToGrid = (value) => {
+        if (isShiftPressed) return value;
+        
+        // gridSize is always in cm internally
+        const gridSizeInches = gridSize / 2.54;
+        const gridSizePx = gridSizeInches * dpi;
+        
+        return Math.round(value / gridSizePx) * gridSizePx;
     };
 
     const handleChange = (key, value) => {
@@ -347,7 +359,11 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                             step="0.1"
                             className={styles.input}
                             value={Math.round(toUnit(selectedZone.x) * 100) / 100}
-                            onChange={(e) => handleChange('x', fromUnit(Number(e.target.value)))}
+                            onChange={(e) => {
+                                let newValue = fromUnit(Number(e.target.value));
+                                newValue = snapToGrid(newValue);
+                                handleChange('x', newValue);
+                            }}
                             onFocus={handleFocus}
                         />
                     </div>
@@ -358,7 +374,11 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                             step="0.1"
                             className={styles.input}
                             value={Math.round(toUnit(selectedZone.y) * 100) / 100}
-                            onChange={(e) => handleChange('y', fromUnit(Number(e.target.value)))}
+                            onChange={(e) => {
+                                let newValue = fromUnit(Number(e.target.value));
+                                newValue = snapToGrid(newValue);
+                                handleChange('y', newValue);
+                            }}
                             onFocus={handleFocus}
                         />
                     </div>

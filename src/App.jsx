@@ -72,6 +72,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isUndoing, setIsUndoing] = useState(false);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
   const stageRef = useRef(null);
 
   // Save current state to history
@@ -565,10 +566,10 @@ function App() {
 
       e.preventDefault();
 
-      // Determine movement distance
+      // Determine movement distance - respect Shift key override
       const gridSizeInches = gridSize / 2.54;
       const gridSizePx = gridSizeInches * SCREEN_DPI;
-      const moveDistance = gridEnabled ? gridSizePx : 10; // 10px if grid disabled
+      const moveDistance = (gridEnabled && !isShiftPressed) ? gridSizePx : 10; // 10px if grid disabled or Shift pressed
 
       let dx = 0, dy = 0;
       switch (e.key) {
@@ -634,7 +635,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, selectedIds, zones, backgroundAttrs, gridEnabled, gridSize]);
+  }, [selectedId, selectedIds, zones, backgroundAttrs, gridEnabled, gridSize, isShiftPressed]);
 
 
   const handleSetBackgroundUrl = (url) => {
@@ -707,6 +708,29 @@ function App() {
     setSelectedIds([]);
     selectShape(null);
   };
+
+  // Track Shift key state for grid snapping override
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Shift') {
+        setIsShiftPressed(true);
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.key === 'Shift') {
+        setIsShiftPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   // Track Ctrl/Cmd key state
   useEffect(() => {
@@ -887,6 +911,7 @@ function App() {
         gridSize={gridSize}
         unit={unit}
         projectName={projectName}
+        isShiftPressed={isShiftPressed}
       />
       {selectedId && (
         <PropertiesPanel
@@ -901,6 +926,7 @@ function App() {
           onUpdateBackground={handleBackgroundChange}
           matSize={matSize}
           unit={unit}
+          isShiftPressed={isShiftPressed}
         />
       )}
       

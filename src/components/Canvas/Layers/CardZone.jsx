@@ -9,7 +9,7 @@ import {
     TRANSFORMER_HANDLE_SIZE
 } from '../../../constants';
 
-const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSelecting = false, onSelect, onChange, onBatchChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false, selectedIds = [], zones = [], tempPositions = {}, onTempPositionUpdate, clearTempPositions }) => {
+const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSelecting = false, onSelect, onChange, onBatchChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false, selectedIds = [], zones = [], tempPositions = {}, onTempPositionUpdate, clearTempPositions, isShiftPressed = false }) => {
     const shapeRef = useRef();
     const trRef = useRef();
     const [zoneImage] = useImage(shapeProps.zoneImage || '');
@@ -17,7 +17,7 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
 
     // Snap to grid helper function
     const snapToGrid = (value) => {
-        if (!gridEnabled) return value;
+        if (!gridEnabled || isShiftPressed) return value;
 
         // gridSize is always in cm internally
         const gridSizeInches = gridSize / 2.54;
@@ -82,10 +82,11 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                     }
                 }}
                 onDragMove={(e) => {
+                    const currentX = isShiftPressed ? e.target.x() : snapToGrid(e.target.x());
+                    const currentY = isShiftPressed ? e.target.y() : snapToGrid(e.target.y());
+                    
                     if (isMultiSelected && dragStartPos && selectedIds.length > 1) {
                         // Calculate relative movement during drag
-                        const currentX = e.target.x();
-                        const currentY = e.target.y();
                         const deltaX = currentX - dragStartPos.x;
                         const deltaY = currentY - dragStartPos.y;
                         
@@ -94,10 +95,18 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                             if (id !== shapeProps.id) {
                                 const otherZone = zones.find(z => z.id === id);
                                 if (otherZone && onTempPositionUpdate) {
-                                    onTempPositionUpdate(id, otherZone.x + deltaX, otherZone.y + deltaY);
+                                    const newX = isShiftPressed ? otherZone.x + deltaX : snapToGrid(otherZone.x + deltaX);
+                                    const newY = isShiftPressed ? otherZone.y + deltaY : snapToGrid(otherZone.y + deltaY);
+                                    onTempPositionUpdate(id, newX, newY);
                                 }
                             }
                         });
+                    }
+                    
+                    // Update the dragged zone position for visual feedback
+                    if (!isShiftPressed && gridEnabled) {
+                        e.target.x(currentX);
+                        e.target.y(currentY);
                     }
                 }}
                 onDragEnd={(e) => {

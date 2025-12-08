@@ -21,7 +21,7 @@ import {
     DRAG_DROP_ZONE_WIDTH
 } from '../../constants';
 
-const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, selectedIds = [], isMultiSelecting = false, onSelect, onChange, onBatchChange, tempPositions = {}, onTempPositionUpdate, clearTempPositions, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = DEFAULT_PROJECT_NAME }, ref) => {
+const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackgroundChange, zones = [], selectedId, selectedIds = [], isMultiSelecting = false, onSelect, onChange, onBatchChange, tempPositions = {}, onTempPositionUpdate, clearTempPositions, matSize = DEFAULT_MAT_SIZE, dpi = DEFAULT_EXPORT_DPI, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, projectName = DEFAULT_PROJECT_NAME, isShiftPressed = false }, ref) => {
     const stageRef = useRef(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
@@ -336,6 +336,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                             gridSize={gridSize}
                             unit={unit}
                             isPanning={isPanning}
+                            isShiftPressed={isShiftPressed}
                         />
                     ))}
                 </Layer>
