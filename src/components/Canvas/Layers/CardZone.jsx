@@ -183,20 +183,6 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                     />
                 )}
                 
-                {/* Main selection indicator in multi-selection mode */}
-                {isMultiSelected && isSelected && (
-                    <Rect
-                        x={-2}
-                        y={-2}
-                        width={shapeProps.width + 4}
-                        height={shapeProps.height + 4}
-                        stroke="#ff6b00"
-                        strokeWidth={3}
-                        fill="transparent"
-                        listening={false}
-                    />
-                )}
-                
                 {/* Invisible Rect for accurate bounding box calculation */}
                 <Rect
                     name="bbox-rect"
