@@ -75,7 +75,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                         fontSize: 16,
                         fontFamily: 'Arial',
                         fontStyle: 'normal',
-                        textColor: '#000000',
+                        textColor: '#00000000',
                         zoneImage: event.target.result,
                         imageOpacity: 1,
                         visibleBorders: {

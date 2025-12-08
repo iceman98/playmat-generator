@@ -121,10 +121,13 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     if (color.startsWith('#')) {
       const rgbValue = hexToRgb(color);
       if (rgbValue) {
-        setRgb({ ...rgbValue }); // Use the alpha from hexToRgb
-        setHex(color);
-        const hslValue = rgbToHsl(rgbValue.r, rgbValue.g, rgbValue.b);
-        setHsl({ ...hslValue, a: rgbValue.a }); // Use the alpha from hexToRgb
+        // Only update if the RGB values changed, not just alpha
+        if (rgbValue.r !== rgb.r || rgbValue.g !== rgb.g || rgbValue.b !== rgb.b) {
+          setRgb({ ...rgbValue }); // Use the alpha from hexToRgb
+          setHex(color);
+          const hslValue = rgbToHsl(rgbValue.r, rgbValue.g, rgbValue.b);
+          setHsl({ ...hslValue, a: rgbValue.a }); // Use the alpha from hexToRgb
+        }
       }
     } else if (color.startsWith('rgba')) {
       // Handle rgba format
@@ -135,10 +138,13 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
         const b = parseInt(match[3]);
         const a = match[4] ? parseFloat(match[4]) : 1;
         
-        setRgb({ r, g, b, a });
-        setHex(rgbToHex(r, g, b, a));
-        const hslValue = rgbToHsl(r, g, b);
-        setHsl({ ...hslValue, a });
+        // Only update if the RGB values changed, not just alpha
+        if (r !== rgb.r || g !== rgb.g || b !== rgb.b) {
+          setRgb({ r, g, b, a });
+          setHex(rgbToHex(r, g, b, a));
+          const hslValue = rgbToHsl(r, g, b);
+          setHsl({ ...hslValue, a });
+        }
       }
     }
   }, [color]);
@@ -378,17 +384,21 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
   };
   
   const handleRgbChange = (channel, value) => {
+    console.log(`handleRgbChange: ${channel} = ${value} (type: ${typeof value})`);
     const newRgb = { ...rgb, [channel]: value };
+    console.log('newRgb after change:', newRgb);
     setRgb(newRgb);
     
     const hslValue = rgbToHsl(newRgb.r, newRgb.g, newRgb.b);
     setHsl({ ...hslValue, a: newRgb.a });
-    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a));
+    const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a);
+    console.log('newHex generated:', newHex);
+    setHex(newHex);
     
     // Call onChange immediately for live preview
     if (onChange) {
       const colorData = {
-        hex: rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a),
+        hex: newHex,
         rgba: newRgb,
         hsla: { ...hslValue, a: newRgb.a }
       };

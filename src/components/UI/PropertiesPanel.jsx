@@ -373,7 +373,7 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                                         return;
                                     }
                                     // Use the rgba value with alpha from the picker
-                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 255}, ${colorData.rgba.g || 255}, ${colorData.rgba.b || 255}, ${colorData.rgba.a || 1})`;
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 255}, ${colorData.rgba.g || 255}, ${colorData.rgba.b || 255}, ${colorData.rgba.a !== undefined ? colorData.rgba.a : 1})`;
                                     handleChange('textColor', colorWithAlpha);
                                 } catch (error) {
                                     console.error('Error in textColor picker:', error, colorData);
@@ -484,7 +484,7 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                                         console.error('Invalid colorData:', colorData);
                                         return;
                                     }
-                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 0}, ${colorData.rgba.g || 0}, ${colorData.rgba.b || 0}, ${colorData.rgba.a || 1})`;
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 0}, ${colorData.rgba.g || 0}, ${colorData.rgba.b || 0}, ${colorData.rgba.a !== undefined ? colorData.rgba.a : 1})`;
                                     handleChange('textStrokeColor', colorWithAlpha);
                                 } catch (error) {
                                     console.error('Error in textStrokeColor picker:', error, colorData);
@@ -663,7 +663,7 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                                         console.error('Invalid colorData:', colorData);
                                         return;
                                     }
-                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 0}, ${colorData.rgba.g || 0}, ${colorData.rgba.b || 0}, ${colorData.rgba.a || 1})`;
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 0}, ${colorData.rgba.g || 0}, ${colorData.rgba.b || 0}, ${colorData.rgba.a !== undefined ? colorData.rgba.a : 1})`;
                                     handleChange('stroke', colorWithAlpha);
                                 } catch (error) {
                                     console.error('Error in stroke picker:', error, colorData);
@@ -681,7 +681,7 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                                         console.error('Invalid colorData:', colorData);
                                         return;
                                     }
-                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 255}, ${colorData.rgba.g || 255}, ${colorData.rgba.b || 255}, ${colorData.rgba.a || 0.3})`;
+                                    const colorWithAlpha = `rgba(${colorData.rgba.r || 255}, ${colorData.rgba.g || 255}, ${colorData.rgba.b || 255}, ${colorData.rgba.a !== undefined ? colorData.rgba.a : 0.3})`;
                                     handleChange('fill', colorWithAlpha);
                                 } catch (error) {
                                     console.error('Error in fill picker:', error, colorData);
