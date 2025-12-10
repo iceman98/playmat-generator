@@ -1,6 +1,6 @@
 import React from 'react';
 import { Line, Text, Group } from 'react-konva';
-import { SCREEN_DPI } from '../../../constants';
+import { SCREEN_DPI, DISTANCE_INDICATORS } from '../../../constants';
 
 const DistanceIndicators = ({ 
   zone, 
@@ -28,25 +28,33 @@ const DistanceIndicators = ({
     return `${distance.toFixed(1)} ${unit}`;
   };
 
-  // Arrow styling
-  const arrowColor = '#ff6b35';
-  const arrowStrokeWidth = 3;
-  const textColor = '#ffffff';
-  const fontSize = 16;
-  const textStroke = '#000000';
-  const textStrokeWidth = 1;
-  const arrowLength = 30;
-  const textOffset = 40;
+  // Arrow styling constants
+  const {
+    arrowColor,
+    arrowStrokeWidth,
+    textColor,
+    fontSize,
+    textStroke,
+    textStrokeWidth,
+    arrowLength,
+    textOffset,
+    minDistance,
+    textWidth,
+    arrowGap,
+    arrowHeadGap,
+    textHorizontalOffset,
+    textVerticalOffset
+  } = DISTANCE_INDICATORS;
 
   return (
     <Group>
       {/* Left arrow and distance */}
-      {distanceToLeft > 0.1 && (
+      {distanceToLeft > minDistance && (
         <Group>
           <Line
             points={[
               zone.x - arrowLength, zone.y + zone.height / 2,
-              zone.x - 5, zone.y + zone.height / 2
+              zone.x - arrowGap, zone.y + zone.height / 2
             ]}
             stroke={arrowColor}
             strokeWidth={arrowStrokeWidth}
@@ -55,9 +63,9 @@ const DistanceIndicators = ({
           />
           <Line
             points={[
-              zone.x - 10, zone.y + zone.height / 2 - 5,
-              zone.x - 5, zone.y + zone.height / 2,
-              zone.x - 10, zone.y + zone.height / 2 + 5
+              zone.x - arrowHeadGap, zone.y + zone.height / 2 - 5,
+              zone.x - arrowGap, zone.y + zone.height / 2,
+              zone.x - arrowHeadGap, zone.y + zone.height / 2 + 5
             ]}
             stroke={arrowColor}
             strokeWidth={arrowStrokeWidth}
@@ -66,14 +74,14 @@ const DistanceIndicators = ({
           />
           <Text
             text={formatDistance(distanceToLeft)}
-            x={zone.x - textOffset - 60}
+            x={zone.x - textOffset - textHorizontalOffset}
             y={zone.y + zone.height / 2 - fontSize / 2}
             fontSize={fontSize}
             fill={textColor}
             stroke={textStroke}
             strokeWidth={textStrokeWidth}
             align="center"
-            width={60}
+            width={textWidth}
             fontStyle="bold"
             style={{ WebkitFontSmoothing: 'antialiased' }}
           />
@@ -81,11 +89,11 @@ const DistanceIndicators = ({
       )}
 
       {/* Right arrow and distance */}
-      {distanceToRight > 0.1 && (
+      {distanceToRight > minDistance && (
         <Group>
           <Line
             points={[
-              zone.x + zone.width + 5, zone.y + zone.height / 2,
+              zone.x + zone.width + arrowGap, zone.y + zone.height / 2,
               zone.x + zone.width + arrowLength, zone.y + zone.height / 2
             ]}
             stroke={arrowColor}
@@ -95,9 +103,9 @@ const DistanceIndicators = ({
           />
           <Line
             points={[
-              zone.x + zone.width + 10, zone.y + zone.height / 2 - 5,
-              zone.x + zone.width + 5, zone.y + zone.height / 2,
-              zone.x + zone.width + 10, zone.y + zone.height / 2 + 5
+              zone.x + zone.width + arrowHeadGap, zone.y + zone.height / 2 - 5,
+              zone.x + zone.width + arrowGap, zone.y + zone.height / 2,
+              zone.x + zone.width + arrowHeadGap, zone.y + zone.height / 2 + 5
             ]}
             stroke={arrowColor}
             strokeWidth={arrowStrokeWidth}
@@ -106,14 +114,14 @@ const DistanceIndicators = ({
           />
           <Text
             text={formatDistance(distanceToRight)}
-            x={zone.x + zone.width + textOffset + 10}
+            x={zone.x + zone.width + textOffset + arrowGap}
             y={zone.y + zone.height / 2 - fontSize / 2}
             fontSize={fontSize}
             fill={textColor}
             stroke={textStroke}
             strokeWidth={textStrokeWidth}
             align="center"
-            width={60}
+            width={textWidth}
             fontStyle="bold"
             style={{ WebkitFontSmoothing: 'antialiased' }}
           />
@@ -121,12 +129,12 @@ const DistanceIndicators = ({
       )}
 
       {/* Top arrow and distance */}
-      {distanceToTop > 0.1 && (
+      {distanceToTop > minDistance && (
         <Group>
           <Line
             points={[
               zone.x + zone.width / 2, zone.y - arrowLength,
-              zone.x + zone.width / 2, zone.y - 5
+              zone.x + zone.width / 2, zone.y - arrowGap
             ]}
             stroke={arrowColor}
             strokeWidth={arrowStrokeWidth}
@@ -135,9 +143,9 @@ const DistanceIndicators = ({
           />
           <Line
             points={[
-              zone.x + zone.width / 2 - 5, zone.y - 10,
-              zone.x + zone.width / 2, zone.y - 5,
-              zone.x + zone.width / 2 + 5, zone.y - 10
+              zone.x + zone.width / 2 - 5, zone.y - arrowHeadGap,
+              zone.x + zone.width / 2, zone.y - arrowGap,
+              zone.x + zone.width / 2 + 5, zone.y - arrowHeadGap
             ]}
             stroke={arrowColor}
             strokeWidth={arrowStrokeWidth}
@@ -146,14 +154,14 @@ const DistanceIndicators = ({
           />
           <Text
             text={formatDistance(distanceToTop)}
-            x={zone.x + zone.width / 2 - 30}
+            x={zone.x + zone.width / 2 - textVerticalOffset}
             y={zone.y - textOffset - fontSize}
             fontSize={fontSize}
             fill={textColor}
             stroke={textStroke}
             strokeWidth={textStrokeWidth}
             align="center"
-            width={60}
+            width={textWidth}
             fontStyle="bold"
             style={{ WebkitFontSmoothing: 'antialiased' }}
           />
@@ -161,11 +169,11 @@ const DistanceIndicators = ({
       )}
 
       {/* Bottom arrow and distance */}
-      {distanceToBottom > 0.1 && (
+      {distanceToBottom > minDistance && (
         <Group>
           <Line
             points={[
-              zone.x + zone.width / 2, zone.y + zone.height + 5,
+              zone.x + zone.width / 2, zone.y + zone.height + arrowGap,
               zone.x + zone.width / 2, zone.y + zone.height + arrowLength
             ]}
             stroke={arrowColor}
@@ -175,9 +183,9 @@ const DistanceIndicators = ({
           />
           <Line
             points={[
-              zone.x + zone.width / 2 - 5, zone.y + zone.height + 10,
-              zone.x + zone.width / 2, zone.y + zone.height + 5,
-              zone.x + zone.width / 2 + 5, zone.y + zone.height + 10
+              zone.x + zone.width / 2 - 5, zone.y + zone.height + arrowHeadGap,
+              zone.x + zone.width / 2, zone.y + zone.height + arrowGap,
+              zone.x + zone.width / 2 + 5, zone.y + zone.height + arrowHeadGap
             ]}
             stroke={arrowColor}
             strokeWidth={arrowStrokeWidth}
@@ -186,14 +194,14 @@ const DistanceIndicators = ({
           />
           <Text
             text={formatDistance(distanceToBottom)}
-            x={zone.x + zone.width / 2 - 30}
+            x={zone.x + zone.width / 2 - textVerticalOffset}
             y={zone.y + zone.height + textOffset}
             fontSize={fontSize}
             fill={textColor}
             stroke={textStroke}
             strokeWidth={textStrokeWidth}
             align="center"
-            width={60}
+            width={textWidth}
             fontStyle="bold"
             style={{ WebkitFontSmoothing: 'antialiased' }}
           />

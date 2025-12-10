@@ -114,3 +114,23 @@ export const EXPORT_DELAY_MS = 50; // Delay before export to ensure render
 // ----------------------------------------------------------------------------
 export const MIN_TRANSFORM_SIZE = 5; // Minimum width/height for transformations
 export const TRANSFORMER_HANDLE_SIZE = 6;
+
+// ----------------------------------------------------------------------------
+// DISTANCE INDICATORS SETTINGS
+// ----------------------------------------------------------------------------
+export const DISTANCE_INDICATORS = {
+    arrowColor: '#ff6b35',
+    arrowStrokeWidth: 3,
+    textColor: '#ffffff',
+    fontSize: 18,
+    textStroke: '#000000',
+    textStrokeWidth: 1,
+    arrowLength: 30,
+    textOffset: 45,
+    minDistance: 0.1, // Minimum distance to show indicators
+    textWidth: 70,
+    arrowGap: 5,
+    arrowHeadGap: 10,
+    textHorizontalOffset: 60,
+    textVerticalOffset: 30,
+};
