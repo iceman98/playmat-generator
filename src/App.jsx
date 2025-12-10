@@ -801,10 +801,10 @@ function App() {
       });
       setZones(newZones);
     } else {
-      // Single zone update
+      // Single zone update - merge new attributes with existing zone
       const newZones = zones.map((zone) => {
         if (zone.id === newAttrs.id) {
-          return newAttrs;
+          return { ...zone, ...newAttrs };
         }
         return zone;
       });
