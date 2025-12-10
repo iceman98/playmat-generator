@@ -337,6 +337,8 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                             unit={unit}
                             isPanning={isPanning}
                             isShiftPressed={isShiftPressed}
+                            matWidth={matWidth}
+                            matHeight={matHeight}
                         />
                     ))}
                 </Layer>

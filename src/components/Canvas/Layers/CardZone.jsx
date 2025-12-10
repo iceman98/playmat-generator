@@ -8,12 +8,15 @@ import {
     SCREEN_DPI,
     TRANSFORMER_HANDLE_SIZE
 } from '../../../constants';
+import DistanceIndicators from './DistanceIndicators';
 
-const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSelecting = false, onSelect, onChange, onBatchChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false, selectedIds = [], zones = [], tempPositions = {}, onTempPositionUpdate, clearTempPositions, isShiftPressed = false }) => {
+const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSelecting = false, onSelect, onChange, onBatchChange, gridEnabled = DEFAULT_GRID_ENABLED, gridSize = DEFAULT_GRID_SIZE, unit = DEFAULT_UNIT, isPanning = false, selectedIds = [], zones = [], tempPositions = {}, onTempPositionUpdate, clearTempPositions, isShiftPressed = false, matWidth, matHeight }) => {
     const shapeRef = useRef();
     const trRef = useRef();
     const [zoneImage] = useImage(shapeProps.zoneImage || '');
     const [dragStartPos, setDragStartPos] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragPosition, setDragPosition] = useState(null);
 
     // Snap to grid helper function
     const snapToGrid = (value) => {
@@ -58,9 +61,16 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
 
     const imageOpacity = shapeProps.imageOpacity !== undefined ? shapeProps.imageOpacity : 1;
 
-    // Get current position (use temp position if available during drag)
-    const currentX = tempPositions[shapeProps.id]?.x || shapeProps.x;
-    const currentY = tempPositions[shapeProps.id]?.y || shapeProps.y;
+    // Get current position for distance indicators (use drag position if dragging, otherwise temp position or original)
+    const currentX = isDragging && dragPosition ? dragPosition.x : (tempPositions[shapeProps.id]?.x || shapeProps.x);
+    const currentY = isDragging && dragPosition ? dragPosition.y : (tempPositions[shapeProps.id]?.y || shapeProps.y);
+
+    // For visual positioning, use drag position during drag, otherwise use stored position
+    const visualX = isDragging && dragPosition ? dragPosition.x : (tempPositions[shapeProps.id]?.x || shapeProps.x);
+    const visualY = isDragging && dragPosition ? dragPosition.y : (tempPositions[shapeProps.id]?.y || shapeProps.y);
+
+    // Store the actual visual position for the Group component
+    const groupPosition = isDragging ? { x: dragPosition?.x || shapeProps.x, y: dragPosition?.y || shapeProps.y } : { x: visualX, y: visualY };
 
     return (
         <React.Fragment>
@@ -68,11 +78,13 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                 draggable={!isPanning}
                 onClick={handleClick}
                 onTap={handleClick}
-                x={currentX}
-                y={currentY}
+                x={shapeProps.x}
+                y={shapeProps.y}
                 rotation={shapeProps.rotation || 0}
                 ref={shapeRef}
                 onDragStart={(e) => {
+                    setIsDragging(true);
+                    setDragPosition({ x: e.target.x(), y: e.target.y() });
                     // Store initial position for multi-selection drag
                     if (isMultiSelected) {
                         setDragStartPos({
@@ -82,13 +94,13 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                     }
                 }}
                 onDragMove={(e) => {
-                    const currentX = isShiftPressed ? e.target.x() : snapToGrid(e.target.x());
-                    const currentY = isShiftPressed ? e.target.y() : snapToGrid(e.target.y());
+                    // Update drag position for real-time distance indicators (use actual position, not snapped)
+                    setDragPosition({ x: e.target.x(), y: e.target.y() });
                     
                     if (isMultiSelected && dragStartPos && selectedIds.length > 1) {
-                        // Calculate relative movement during drag
-                        const deltaX = currentX - dragStartPos.x;
-                        const deltaY = currentY - dragStartPos.y;
+                        // Calculate relative movement during drag (use actual position for smooth movement)
+                        const deltaX = e.target.x() - dragStartPos.x;
+                        const deltaY = e.target.y() - dragStartPos.y;
                         
                         // Update temporary positions for all selected zones
                         selectedIds.forEach(id => {
@@ -103,20 +115,19 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                         });
                     }
                     
-                    // Update the dragged zone position for visual feedback
-                    if (!isShiftPressed && gridEnabled) {
-                        e.target.x(currentX);
-                        e.target.y(currentY);
-                    }
+                    // Remove the visual position correction - let the element move freely during drag
+                    // The snap-to-grid will only be applied at drag end
                 }}
                 onDragEnd={(e) => {
-                    const newX = snapToGrid(e.target.x());
-                    const newY = snapToGrid(e.target.y());
+                    setIsDragging(false);
+                    const finalX = snapToGrid(e.target.x());
+                    const finalY = snapToGrid(e.target.y());
                     
+                    // Update the actual position through onChange to make it persistent
                     if (isMultiSelected && dragStartPos && selectedIds.length > 1) {
                         // Calculate relative movement
-                        const deltaX = newX - dragStartPos.x;
-                        const deltaY = newY - dragStartPos.y;
+                        const deltaX = finalX - dragStartPos.x;
+                        const deltaY = finalY - dragStartPos.y;
                         
                         // Prepare batch updates for all selected zones
                         const updates = [];
@@ -124,8 +135,8 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                         // Add update for dragged zone
                         updates.push({
                             ...shapeProps,
-                            x: newX,
-                            y: newY,
+                            x: finalX,
+                            y: finalY,
                         });
                         
                         // Add updates for other selected zones
@@ -153,11 +164,12 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                         // Single zone update
                         onChange({
                             ...shapeProps,
-                            x: newX,
-                            y: newY,
+                            x: finalX,
+                            y: finalY,
                         });
                     }
                     
+                    setDragPosition(null);
                     setDragStartPos(null);
                 }}
                 onTransformEnd={(e) => {
@@ -503,6 +515,19 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                     anchorSize={TRANSFORMER_HANDLE_SIZE}
                     anchorCornerRadius={1}
                     anchorStrokeWidth={1}
+                />
+            )}
+            {isDragging && (
+                <DistanceIndicators
+                    zone={{
+                        ...shapeProps,
+                        x: currentX,
+                        y: currentY
+                    }}
+                    matWidth={matWidth}
+                    matHeight={matHeight}
+                    unit={unit}
+                    isVisible={isDragging}
                 />
             )}
         </React.Fragment>
