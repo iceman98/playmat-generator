@@ -30,9 +30,11 @@ const DistanceIndicators = ({
 
   // Arrow styling
   const arrowColor = '#ff6b35';
-  const arrowStrokeWidth = 2;
+  const arrowStrokeWidth = 3;
   const textColor = '#ffffff';
-  const fontSize = 12;
+  const fontSize = 16;
+  const textStroke = '#000000';
+  const textStrokeWidth = 1;
   const arrowLength = 30;
   const textOffset = 40;
 
@@ -64,12 +66,16 @@ const DistanceIndicators = ({
           />
           <Text
             text={formatDistance(distanceToLeft)}
-            x={zone.x - textOffset - 30}
+            x={zone.x - textOffset - 60}
             y={zone.y + zone.height / 2 - fontSize / 2}
             fontSize={fontSize}
             fill={textColor}
+            stroke={textStroke}
+            strokeWidth={textStrokeWidth}
             align="center"
             width={60}
+            fontStyle="bold"
+            style={{ WebkitFontSmoothing: 'antialiased' }}
           />
         </Group>
       )}
@@ -100,12 +106,16 @@ const DistanceIndicators = ({
           />
           <Text
             text={formatDistance(distanceToRight)}
-            x={zone.x + zone.width + textOffset - 30}
+            x={zone.x + zone.width + textOffset + 10}
             y={zone.y + zone.height / 2 - fontSize / 2}
             fontSize={fontSize}
             fill={textColor}
+            stroke={textStroke}
+            strokeWidth={textStrokeWidth}
             align="center"
             width={60}
+            fontStyle="bold"
+            style={{ WebkitFontSmoothing: 'antialiased' }}
           />
         </Group>
       )}
@@ -140,8 +150,12 @@ const DistanceIndicators = ({
             y={zone.y - textOffset - fontSize}
             fontSize={fontSize}
             fill={textColor}
+            stroke={textStroke}
+            strokeWidth={textStrokeWidth}
             align="center"
             width={60}
+            fontStyle="bold"
+            style={{ WebkitFontSmoothing: 'antialiased' }}
           />
         </Group>
       )}
@@ -176,8 +190,12 @@ const DistanceIndicators = ({
             y={zone.y + zone.height + textOffset}
             fontSize={fontSize}
             fill={textColor}
+            stroke={textStroke}
+            strokeWidth={textStrokeWidth}
             align="center"
             width={60}
+            fontStyle="bold"
+            style={{ WebkitFontSmoothing: 'antialiased' }}
           />
         </Group>
       )}
