@@ -20,6 +20,7 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
 
     // Snap to grid helper function
     const snapToGrid = (value) => {
+        // Only apply snap-to-grid when grid is enabled and shift is NOT pressed
         if (!gridEnabled || isShiftPressed) return value;
 
         // gridSize is always in cm internally
@@ -94,13 +95,17 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                     }
                 }}
                 onDragMove={(e) => {
-                    // Update drag position for real-time distance indicators (use actual position, not snapped)
-                    setDragPosition({ x: e.target.x(), y: e.target.y() });
+                    // Apply snap-to-grid during movement if grid is enabled and shift is not pressed
+                    const currentX = snapToGrid(e.target.x());
+                    const currentY = snapToGrid(e.target.y());
+                    
+                    // Update drag position for real-time distance indicators
+                    setDragPosition({ x: currentX, y: currentY });
                     
                     if (isMultiSelected && dragStartPos && selectedIds.length > 1) {
-                        // Calculate relative movement during drag (use actual position for smooth movement)
-                        const deltaX = e.target.x() - dragStartPos.x;
-                        const deltaY = e.target.y() - dragStartPos.y;
+                        // Calculate relative movement during drag
+                        const deltaX = currentX - dragStartPos.x;
+                        const deltaY = currentY - dragStartPos.y;
                         
                         // Update temporary positions for all selected zones
                         selectedIds.forEach(id => {
@@ -115,8 +120,13 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                         });
                     }
                     
-                    // Remove the visual position correction - let the element move freely during drag
-                    // The snap-to-grid will only be applied at drag end
+                    // Apply snap-to-grid to the dragged zone during movement
+                    if (!isShiftPressed && gridEnabled) {
+                        e.target.position({
+                            x: currentX,
+                            y: currentY
+                        });
+                    }
                 }}
                 onDragEnd={(e) => {
                     setIsDragging(false);
