@@ -121,13 +121,12 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     if (color.startsWith('#')) {
       const rgbValue = hexToRgb(color);
       if (rgbValue) {
-        // Only update if the RGB values changed, not just alpha
-        if (rgbValue.r !== rgb.r || rgbValue.g !== rgb.g || rgbValue.b !== rgb.b) {
-          setRgb({ ...rgbValue }); // Use the alpha from hexToRgb
-          setHex(color);
-          const hslValue = rgbToHsl(rgbValue.r, rgbValue.g, rgbValue.b);
-          setHsl({ ...hslValue, a: rgbValue.a }); // Use the alpha from hexToRgb
-        }
+        // Always update when opening the picker to ensure correct alpha is set
+        // The initial state has a: 1, so we need to override it with the actual alpha
+        setRgb({ ...rgbValue }); // Use the alpha from hexToRgb
+        setHex(color);
+        const hslValue = rgbToHsl(rgbValue.r, rgbValue.g, rgbValue.b);
+        setHsl({ ...hslValue, a: rgbValue.a }); // Use the alpha from hexToRgb
       }
     } else if (color.startsWith('rgba')) {
       // Handle rgba format
@@ -138,13 +137,11 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
         const b = parseInt(match[3]);
         const a = match[4] ? parseFloat(match[4]) : 1;
         
-        // Only update if the RGB values changed, not just alpha
-        if (r !== rgb.r || g !== rgb.g || b !== rgb.b) {
-          setRgb({ r, g, b, a });
-          setHex(rgbToHex(r, g, b, a));
-          const hslValue = rgbToHsl(r, g, b);
-          setHsl({ ...hslValue, a });
-        }
+        // Always update when opening the picker to ensure correct alpha is set
+        setRgb({ r, g, b, a });
+        setHex(rgbToHex(r, g, b, a));
+        const hslValue = rgbToHsl(r, g, b);
+        setHsl({ ...hslValue, a });
       }
     }
   }, [color]);
@@ -359,28 +356,35 @@ const CompactColorPicker = ({ color = '#ff0000', onChange, label }) => {
     const lightness = 100 - (clampedY / canvas.height) * 100;
     
     const newRgb = hslToRgb(hue, 100, lightness);
-    const newRgbWithAlpha = { ...newRgb, a: rgb.a };
     
-    setRgb(newRgbWithAlpha);
-    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a));
-    setHsl({ h: Math.round(hue), s: 100, l: Math.round(lightness), a: rgb.a });
-    
-    // Call onChange immediately for live preview on canvas element
-    if (onChange) {
-      const colorData = {
-        hex: rgbToHex(newRgb.r, newRgb.g, newRgb.b, newRgb.a),
-        rgba: newRgbWithAlpha,
-        hsla: { h: Math.round(hue), s: 100, l: Math.round(lightness), a: rgb.a }
-      };
+    // Use a functional update to ensure we get the latest alpha value
+    setRgb(currentRgb => {
+      const newRgbWithAlpha = { ...newRgb, a: currentRgb.a };
+      const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b, currentRgb.a);
+      const newHsl = { h: Math.round(hue), s: 100, l: Math.round(lightness), a: currentRgb.a };
       
-      // Handle alpha 0 case - use 'transparent' string
-      if (rgb.a === 0) {
-        colorData.hex = 'transparent';
-        colorData.rgba = { r: newRgb.r, g: newRgb.g, b: newRgb.b, a: 0 };
+      setHex(newHex);
+      setHsl(newHsl);
+      
+      // Call onChange immediately for live preview on canvas element
+      if (onChange) {
+        const colorData = {
+          hex: newHex,
+          rgba: newRgbWithAlpha,
+          hsla: newHsl
+        };
+        
+        // Handle alpha 0 case - use 'transparent' string
+        if (currentRgb.a === 0) {
+          colorData.hex = 'transparent';
+          colorData.rgba = { r: newRgb.r, g: newRgb.g, b: newRgb.b, a: 0 };
+        }
+        
+        onChange(colorData);
       }
       
-      onChange(colorData);
-    }
+      return newRgbWithAlpha;
+    });
   };
   
   const handleRgbChange = (channel, value) => {
