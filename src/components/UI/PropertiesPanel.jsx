@@ -35,10 +35,13 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
             if (isBackground) {
                 onUpdateBackground({ ...backgroundAttrs, [key]: value });
             } else if (selectedIds.length > 1) {
-                // Apply to all selected zones
-                allSelectedZones.forEach(zone => {
-                    onUpdateZone({ ...zone, [key]: value });
-                });
+                // For multiselection, create a single update object with only the changed key
+                // and apply it to the first selected zone. The handleZoneChange function will
+                // handle applying this change to all selected zones.
+                const firstSelectedZone = allSelectedZones[0];
+                if (firstSelectedZone) {
+                    onUpdateZone({ [key]: value, id: firstSelectedZone.id });
+                }
             } else {
                 // Single zone
                 onUpdateZone({ ...selectedZone, [key]: value });
