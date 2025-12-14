@@ -377,6 +377,16 @@
     margin-left: 22px;
 }
 
+.zoneItemDragOver {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+}
+
+.zoneItem[draggable="true"]:active {
+    cursor: grabbing !important;
+}
+
 /* Header styles */
 .header {
     display: flex;

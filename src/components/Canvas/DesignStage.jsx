@@ -317,7 +317,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                 )}
 
                 <Layer>
-                    {zones.map((zone, i) => (
+                    {[...zones].reverse().map((zone, i) => (
                         <CardZone
                             key={zone.id}
                             shapeProps={zone}

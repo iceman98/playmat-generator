@@ -494,7 +494,7 @@ function App() {
               x: zone.x + offset,
               y: zone.y + offset,
             }));
-            setZones([...zones, ...newZones]);
+            setZones([...newZones, ...zones]); // Add pasted zones at the beginning
             // Select the newly pasted zones
             const newIds = newZones.map(z => z.id);
             setSelectedIds(newIds);
@@ -507,7 +507,7 @@ function App() {
               x: copiedZone.x + offset,
               y: copiedZone.y + offset,
             };
-            setZones([...zones, newZone]);
+            setZones([newZone, ...zones]); // Add pasted zone at the beginning
             selectShape(newZone.id);
           }
           // Save to history after state update
@@ -771,7 +771,7 @@ function App() {
       width: widthPx,
       height: heightPx,
     };
-    setZones([...zones, newZone]);
+    setZones([newZone, ...zones]); // Add new zone at the beginning
     // Save to history after state update
     setTimeout(() => saveStateToHistory(), 0);
   };
@@ -782,7 +782,7 @@ function App() {
     
     if (!existingZone) {
       // This is a new zone, add it to the zones array
-      setZones([...zones, newAttrs]);
+      setZones([newAttrs, ...zones]); // Add new zone at the beginning
     } else if (selectedIds.length > 1 && selectedIds.includes(newAttrs.id)) {
       // Update all selected zones with the same property changes
       const newZones = zones.map((zone) => {
@@ -831,6 +831,12 @@ function App() {
       ...prev,
       [zoneId]: { x, y }
     }));
+  };
+
+  const handleReorderZones = (newZones) => {
+    setZones(newZones);
+    // Save to history after reordering
+    setTimeout(() => saveStateToHistory(), 0);
   };
 
   const clearTempPositions = () => {
@@ -889,6 +895,7 @@ function App() {
         backgroundType={backgroundType}
         unsplashApiKey={unsplashApiKey}
         onSetUnsplashApiKey={setUnsplashApiKey}
+        onReorderZones={handleReorderZones}
       />
       <DesignStage
         ref={stageRef}

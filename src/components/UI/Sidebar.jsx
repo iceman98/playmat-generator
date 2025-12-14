@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save, Upload } from 'lucide-react';
+import { Search, Image as ImageIcon, Square, Download, Settings, FilePlus, Save, Upload, GripVertical } from 'lucide-react';
 import { AVAILABLE_DPI_OPTIONS, SCREEN_DPI } from '../../constants';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onOpenSearchModal, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize, backgroundType, unsplashApiKey, onSetUnsplashApiKey }) => {
+const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onOpenSearchModal, onAddZone, onExport, onNewProject, onDownloadProject, onUploadProject, matSize, onSetMatSize, unit, onSetUnit, dpi, onSetDpi, gridEnabled, onSetGridEnabled, gridSize, onSetGridSize, zones, selectedId, onSelectZone, lastSaved, projectName, onSetProjectName, defaultZoneSize, onSetDefaultZoneSize, backgroundType, unsplashApiKey, onSetUnsplashApiKey, onReorderZones }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('background'); // background, elements, settings
     const [backgroundInputType, setBackgroundInputType] = useState(backgroundType || 'url'); // 'url' or 'upload'
     const [urlInput, setUrlInput] = useState('');
+    const [draggedZone, setDraggedZone] = useState(null);
+    const [dragOverZone, setDragOverZone] = useState(null);
 
     // Select all text when focusing on numeric inputs
     const handleFocus = (e) => {
@@ -32,6 +34,48 @@ const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onOpenSearchModal,
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    // Drag and drop handlers for zone reordering
+    const handleDragStart = (e, zone) => {
+        setDraggedZone(zone);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target.outerHTML);
+    };
+
+    const handleDragOver = (e, zone) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (draggedZone && draggedZone.id !== zone.id) {
+            setDragOverZone(zone);
+        }
+    };
+
+    const handleDragLeave = () => {
+        setDragOverZone(null);
+    };
+
+    const handleDrop = (e, targetZone) => {
+        e.preventDefault();
+        setDragOverZone(null);
+        
+        if (draggedZone && draggedZone.id !== targetZone.id && onReorderZones) {
+            const draggedIndex = zones.findIndex(z => z.id === draggedZone.id);
+            const targetIndex = zones.findIndex(z => z.id === targetZone.id);
+            
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                const newZones = [...zones];
+                newZones.splice(draggedIndex, 1);
+                newZones.splice(targetIndex, 0, draggedZone);
+                onReorderZones(newZones);
+            }
+        }
+        setDraggedZone(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedZone(null);
+        setDragOverZone(null);
     };
 
     const handleUrlSubmit = (e) => {
@@ -216,13 +260,24 @@ const Sidebar = ({ onSetBackgroundUrl, onSetBackgroundUpload, onOpenSearchModal,
                         {zones.length > 0 && (
                             <div className={styles.zoneList}>
                                 <h4>Zone List ({zones.length})</h4>
+                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px', fontStyle: 'italic' }}>
+                                    Top zones render on top • Drag to reorder
+                                </div>
                                 {zones.map((zone) => (
                                     <div
                                         key={zone.id}
-                                        className={`${styles.zoneItem} ${selectedId === zone.id ? styles.zoneItemActive : ''}`}
+                                        className={`${styles.zoneItem} ${selectedId === zone.id ? styles.zoneItemActive : ''} ${dragOverZone?.id === zone.id ? styles.zoneItemDragOver : ''}`}
                                         onClick={() => onSelectZone(zone.id)}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, zone)}
+                                        onDragOver={(e) => handleDragOver(e, zone)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, zone)}
+                                        onDragEnd={handleDragEnd}
+                                        style={{ cursor: draggedZone?.id === zone.id ? 'grabbing' : 'grab' }}
                                     >
                                         <div className={styles.zoneItemHeader}>
+                                            <GripVertical size={12} style={{ marginRight: '8px', opacity: 0.5, cursor: 'grab' }} />
                                             <Square size={14} />
                                             <span className={styles.zoneItemTitle}>
                                                 {zone.text || 'Untitled Zone'}
