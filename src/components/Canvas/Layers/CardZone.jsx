@@ -36,6 +36,12 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
         if (e.type === 'dragstart' || e.dragStart) {
             return;
         }
+        
+        // Don't change selection if panning was active or is currently active
+        if (isPanning) {
+            return;
+        }
+        
         onSelect(shapeProps.id);
     };
 

@@ -29,6 +29,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
     const [showBorder, setShowBorder] = useState(DEFAULT_SHOW_BORDER);
     const [showGrid, setShowGrid] = useState(DEFAULT_SHOW_GRID);
     const [isPanning, setIsPanning] = useState(false);
+    const [recentlyPanning, setRecentlyPanning] = useState(false);
 
     // Handle image drop to create zone
     const handleDrop = (e) => {
@@ -226,32 +227,39 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
         if (isMiddleClick || (isLeftClick && isEmptyStage)) {
             e.evt.preventDefault();
             setIsPanning(true);
+            setRecentlyPanning(true);
             lastMousePos.current = { x: e.evt.clientX, y: e.evt.clientY };
         }
 
         // Deselect when clicking on empty area (Stage)
-        if (isEmptyStage && isLeftClick) {
+        if (e.target === e.target.getStage()) {
             onSelect(null);
         }
-    };
-
-    const handleMouseMove = (e) => {
-        if (!isPanning) return;
-
-        const dx = e.evt.clientX - lastMousePos.current.x;
-        const dy = e.evt.clientY - lastMousePos.current.y;
-
-        setPosition((prev) => ({
-            x: prev.x + dx,
-            y: prev.y + dy,
-        }));
-
-        lastMousePos.current = { x: e.evt.clientX, y: e.evt.clientY };
     };
 
     const handleMouseUp = (e) => {
         // Disable panning when mouse button is released
         setIsPanning(false);
+        
+        // Clear recentlyPanning after a short delay to prevent selection
+        setTimeout(() => {
+            setRecentlyPanning(false);
+        }, 100);
+    };
+
+    const handleMouseMove = (e) => {
+        // Update last mouse position for panning calculations
+        if (isPanning && lastMousePos.current) {
+            const dx = e.evt.clientX - lastMousePos.current.x;
+            const dy = e.evt.clientY - lastMousePos.current.y;
+            
+            setPosition((prev) => ({
+                x: prev.x + dx,
+                y: prev.y + dy,
+            }));
+            
+            lastMousePos.current = { x: e.evt.clientX, y: e.evt.clientY };
+        }
     };
 
     return (
@@ -335,7 +343,7 @@ const DesignStage = forwardRef(({ backgroundImage, backgroundAttrs, onBackground
                             gridEnabled={gridEnabled}
                             gridSize={gridSize}
                             unit={unit}
-                            isPanning={isPanning}
+                            isPanning={isPanning || recentlyPanning}
                             isShiftPressed={isShiftPressed}
                             matWidth={matWidth}
                             matHeight={matHeight}
