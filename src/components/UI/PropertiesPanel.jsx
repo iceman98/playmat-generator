@@ -145,27 +145,56 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
         setUseGoogleFont(checked);
         
         if (!checked) {
-            // Clear the global font registry for this zone
-            if (selectedZone?.id && window.googleFontRegistry) {
-                window.googleFontRegistry.delete(selectedZone.id);
+            // Clear the global font registry for all selected zones
+            if (selectedIds.length > 0) {
+                selectedIds.forEach(zoneId => {
+                    if (window.googleFontRegistry) {
+                        window.googleFontRegistry.delete(zoneId);
+                    }
+                });
+            } else if (selectedZone?.id) {
+                if (window.googleFontRegistry) {
+                    window.googleFontRegistry.delete(selectedZone.id);
+                }
             }
             
             // Reset to selected font from dropdown when disabling Google Font
             const selectedFont = document.querySelector('select[name="fontFamily"]')?.value || 'Arial';
             setGoogleFontInput('');
             
-            // Update all properties in one single call to prevent overwriting
-            const updatedZone = {
-                ...selectedZone,
-                useGoogleFont: false,
-                fontFamily: selectedFont,
-                googleFont: ''
-            };
-            onUpdateZone(updatedZone);
+            if (selectedIds.length > 1) {
+                // For multiselection, update only the font-related properties for all selected zones
+                const firstSelectedZone = allSelectedZones[0];
+                if (firstSelectedZone) {
+                    // Update useGoogleFont for all selected zones
+                    onUpdateZone({ useGoogleFont: false, id: firstSelectedZone.id });
+                    
+                    // Update fontFamily for all selected zones  
+                    onUpdateZone({ fontFamily: selectedFont, id: firstSelectedZone.id });
+                    
+                    // Update googleFont for all selected zones
+                    onUpdateZone({ googleFont: '', id: firstSelectedZone.id });
+                }
+            } else {
+                // Single zone - update all properties in one call
+                const updatedZone = {
+                    ...selectedZone,
+                    useGoogleFont: false,
+                    fontFamily: selectedFont,
+                    googleFont: ''
+                };
+                onUpdateZone(updatedZone);
+            }
             
             // Force re-render
             setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: selectedFont, zoneId: selectedZone?.id } }));
+                if (selectedIds.length > 0) {
+                    selectedIds.forEach(zoneId => {
+                        window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: selectedFont, zoneId } }));
+                    });
+                } else if (selectedZone?.id) {
+                    window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: selectedFont, zoneId: selectedZone?.id } }));
+                }
             }, 100);
         } else {
             // When enabling, just set useGoogleFont to true
