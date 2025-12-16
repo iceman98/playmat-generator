@@ -17,6 +17,7 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
     const [dragStartPos, setDragStartPos] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragPosition, setDragPosition] = useState(null);
+    const [forceFontUpdate, setForceFontUpdate] = useState(0); // Force font update counter
 
     // Snap to grid helper function
     const snapToGrid = (value) => {
@@ -50,7 +51,30 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
             trRef.current.nodes([shapeRef.current]);
             trRef.current.getLayer().batchDraw();
         }
-    }, [isSelected, isMultiSelected, shapeProps]);
+    }, [isSelected, isMultiSelected]);
+
+    // Listen for font load events and force re-render
+    useEffect(() => {
+        const handleFontLoaded = (event) => {
+            // Check if this font load event is for this zone
+            if (event.detail.fontName && shapeProps.id && event.detail.zoneId === shapeProps.id) {
+                // Force a re-render by incrementing the update counter
+                setForceFontUpdate(prev => prev + 1);
+                setTimeout(() => {
+                    // Also force Konva to redraw the layer
+                    if (shapeRef.current) {
+                        const layer = shapeRef.current.getLayer();
+                        if (layer) {
+                            layer.batchDraw();
+                        }
+                    }
+                }, 100);
+            }
+        };
+
+        window.addEventListener('fontLoaded', handleFontLoaded);
+        return () => window.removeEventListener('fontLoaded', handleFontLoaded);
+    }, [shapeProps.fontFamily, shapeProps.id]);
 
     useEffect(() => {
         if (shapeRef.current) {
@@ -476,9 +500,15 @@ const CardZone = ({ shapeProps, isSelected, isMultiSelected = false, isMultiSele
                 <Text
                     text={shapeProps.text || "Card Zone"}
                     fontSize={shapeProps.fontSize || 14}
-                    fontFamily={shapeProps.fontFamily || 'Arial'}
+                    fontFamily={(() => {
+                        // Check global font registry first, then fall back to shapeProps
+                        const globalFont = window.googleFontRegistry?.get(shapeProps.id);
+                        const actualFont = globalFont || shapeProps.fontFamily || 'Arial';
+                        return actualFont;
+                    })()}
                     fontStyle={shapeProps.fontStyle || 'normal'}
                     fill={shapeProps.textColor || "white"}
+                    key={`${shapeProps.id}-${forceFontUpdate}`}
                     align="center"
                     width={shapeProps.width}
                     listening={false}

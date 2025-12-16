@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Type, Box, Palette, Move, Maximize, Image as ImageIcon, ArrowLeftRight, ArrowUpDown, Maximize2, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Crosshair } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Maximize, Maximize2, Move, Type, ImageIcon, Box, ArrowLeftRight, ArrowUpDown, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Crosshair } from 'lucide-react';
 import CompactColorPicker from './CompactColorPicker';
 import styles from './PropertiesPanel.module.css';
 
@@ -44,7 +44,8 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                 }
             } else {
                 // Single zone
-                onUpdateZone({ ...selectedZone, [key]: value });
+                const updatedZone = { ...selectedZone, [key]: value };
+                onUpdateZone(updatedZone);
             }
         } catch (error) {
             console.error('Error in handleChange:', error, { key, value, selectedZone });
@@ -55,6 +56,120 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
     const handleFocus = (e) => {
         e.target.select();
     };
+
+    // Google Fonts functionality
+    const [useGoogleFont, setUseGoogleFont] = useState(selectedZone?.useGoogleFont || false);
+    const [googleFontInput, setGoogleFontInput] = useState(selectedZone?.googleFont || '');
+    const [currentFontFamily, setCurrentFontFamily] = useState(selectedZone?.fontFamily || 'Arial');
+
+    // Global font registry to track fonts per zone
+    if (!window.googleFontRegistry) {
+        window.googleFontRegistry = new Map();
+    }
+
+    // Function to load Google Font (only accepts font names)
+    const loadGoogleFont = (fontName) => {
+        if (!fontName) {
+            return null;
+        }
+
+        // Clean up font name
+        const cleanFontName = fontName.trim();
+        const fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(cleanFontName)}&display=swap`;
+        // Store font mapping for the current zone
+        if (selectedZone?.id) {
+            window.googleFontRegistry.set(selectedZone.id, cleanFontName);
+        }
+        
+        // Check if font is already loaded
+        const existingLink = document.querySelector(`link[href*="family=${encodeURIComponent(cleanFontName)}"]`);
+        if (existingLink) {
+            // Force re-render of all text elements by dispatching a custom event
+            window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: cleanFontName, zoneId: selectedZone?.id } }));
+            return cleanFontName;
+        }
+
+        // Create and append the link element
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = fontUrl;
+        link.crossOrigin = 'anonymous';
+        
+        // Add load/error event listeners for debugging
+        link.onload = () => {
+            // Force re-render of all text elements by dispatching a custom event
+            window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: cleanFontName, zoneId: selectedZone?.id } }));
+            // Also trigger a global re-render by forcing a state update
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
+        };
+        
+        link.onerror = (error) => {
+            console.error('Error loading font:', error, fontUrl);
+        };
+        
+        document.head.appendChild(link);
+
+        return cleanFontName;
+    };
+
+    // Handle Google Font input changes (no loading on keystroke)
+    const handleGoogleFontChange = (value) => {
+        setGoogleFontInput(value);
+    };
+
+    // Apply Google Font (only when button is clicked)
+    const handleApplyGoogleFont = () => {
+        const fontName = loadGoogleFont(googleFontInput);
+        
+        if (fontName) {
+            // Update internal state immediately to force re-render
+            setCurrentFontFamily(fontName);
+            setUseGoogleFont(true);
+            
+            handleChange('fontFamily', fontName);
+            handleChange('useGoogleFont', true);
+            handleChange('googleFont', googleFontInput);
+            setUseGoogleFont(true);
+            
+            // Force a delay to ensure font is loaded before applying
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName, zoneId: selectedZone?.id } }));
+            }, 200);
+        }
+    };
+
+    // Handle toggle for Google Font
+    const handleUseGoogleFontToggle = (checked) => {
+        setUseGoogleFont(checked);
+        handleChange('useGoogleFont', checked);
+        
+        if (!checked) {
+            // Clear the global font registry for this zone
+            if (selectedZone?.id && window.googleFontRegistry) {
+                window.googleFontRegistry.delete(selectedZone.id);
+            }
+            
+            // Reset to selected font from dropdown when disabling Google Font
+            const selectedFont = document.querySelector('select[name="fontFamily"]')?.value || 'Arial';
+            handleChange('fontFamily', selectedFont);
+            setGoogleFontInput('');
+            handleChange('googleFont', '');
+            
+            // Force re-render
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: selectedFont, zoneId: selectedZone?.id } }));
+            }, 100);
+        }
+    };
+
+    // Load Google Font on component mount if it's already set
+    useEffect(() => {
+        if (selectedZone?.useGoogleFont && selectedZone?.googleFont) {
+            loadGoogleFont(selectedZone.googleFont);
+        }
+    }, [selectedZone?.googleFont, selectedZone?.useGoogleFont]);
 
     if (isBackground) {
         const bgWidth = backgroundAttrs?.imageWidth ? backgroundAttrs.imageWidth * (backgroundAttrs.scaleX || 1) : 0;
@@ -468,6 +583,50 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
                         </optgroup>
                     </select>
                 </div>
+
+                <div className={styles.controlGroup}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={useGoogleFont}
+                            onChange={(e) => handleUseGoogleFontToggle(e.target.checked)}
+                            style={{ marginRight: '8px' }}
+                        />
+                        Use Google Font
+                    </label>
+                </div>
+
+                {useGoogleFont && (
+                    <div className={styles.controlGroup}>
+                        <label>Google Font Name</label>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            value={googleFontInput}
+                            onChange={(e) => handleGoogleFontChange(e.target.value)}
+                            placeholder="Roboto, Open Sans, Wix Madefor Text"
+                            style={{ fontSize: '12px' }}
+                        />
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            Enter a Google Font name (e.g., "Roboto", "Open Sans", "Wix Madefor Text")
+                        </div>
+                        <button
+                            onClick={handleApplyGoogleFont}
+                            style={{
+                                marginTop: '8px',
+                                padding: '6px 12px',
+                                backgroundColor: 'var(--primary)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                            }}
+                        >
+                            Apply Font
+                        </button>
+                    </div>
+                )}
 
                 <div className={styles.controlGroup}>
                     <label>
