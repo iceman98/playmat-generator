@@ -58,9 +58,9 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
     };
 
     // Google Fonts functionality
-    const [useGoogleFont, setUseGoogleFont] = useState(selectedZone?.useGoogleFont || false);
-    const [googleFontInput, setGoogleFontInput] = useState(selectedZone?.googleFont || '');
-    const [currentFontFamily, setCurrentFontFamily] = useState(selectedZone?.fontFamily || 'Arial');
+    const [useGoogleFont, setUseGoogleFont] = useState(false);
+    const [googleFontInput, setGoogleFontInput] = useState('');
+    const [currentFontFamily, setCurrentFontFamily] = useState('Arial');
 
     // Global font registry to track fonts per zone
     if (!window.googleFontRegistry) {
@@ -143,7 +143,6 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
     // Handle toggle for Google Font
     const handleUseGoogleFontToggle = (checked) => {
         setUseGoogleFont(checked);
-        handleChange('useGoogleFont', checked);
         
         if (!checked) {
             // Clear the global font registry for this zone
@@ -153,23 +152,40 @@ const PropertiesPanel = ({ selectedZone, selectedIds = [], allSelectedZones = []
             
             // Reset to selected font from dropdown when disabling Google Font
             const selectedFont = document.querySelector('select[name="fontFamily"]')?.value || 'Arial';
-            handleChange('fontFamily', selectedFont);
             setGoogleFontInput('');
-            handleChange('googleFont', '');
+            
+            // Update all properties in one single call to prevent overwriting
+            const updatedZone = {
+                ...selectedZone,
+                useGoogleFont: false,
+                fontFamily: selectedFont,
+                googleFont: ''
+            };
+            onUpdateZone(updatedZone);
             
             // Force re-render
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent('fontLoaded', { detail: { fontName: selectedFont, zoneId: selectedZone?.id } }));
             }, 100);
+        } else {
+            // When enabling, just set useGoogleFont to true
+            handleChange('useGoogleFont', true);
         }
     };
 
-    // Load Google Font on component mount if it's already set
+    // Sync local state with selectedZone data when zone changes
     useEffect(() => {
-        if (selectedZone?.useGoogleFont && selectedZone?.googleFont) {
-            loadGoogleFont(selectedZone.googleFont);
+        if (selectedZone) {
+            setGoogleFontInput(selectedZone.googleFont || '');
+            setCurrentFontFamily(selectedZone.fontFamily || 'Arial');
+            setUseGoogleFont(selectedZone.useGoogleFont || false);
+            
+            // Load Google Font if it's enabled
+            if (selectedZone.useGoogleFont && selectedZone.googleFont) {
+                loadGoogleFont(selectedZone.googleFont);
+            }
         }
-    }, [selectedZone?.googleFont, selectedZone?.useGoogleFont]);
+    }, [selectedZone?.id]); // Solo reaccionar al cambio de zona, no a cambios de propiedades
 
     if (isBackground) {
         const bgWidth = backgroundAttrs?.imageWidth ? backgroundAttrs.imageWidth * (backgroundAttrs.scaleX || 1) : 0;
